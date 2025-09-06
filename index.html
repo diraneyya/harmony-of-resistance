@@ -285,9 +285,18 @@
             transition: all 0.3s ease;
         }
 
+        @media (min-width: 769px) {
+            .mobile-toggle, .toggle-labels {
+                display: none;
+            }
+            .mobile-bottom-bar {
+                display: none !important;
+            }
+        }
+
         @media (max-width: 768px) {
             body {
-                padding: 10px 0;
+                padding: 10px 0 80px 0;
             }
             
             .container {
@@ -624,6 +633,10 @@
         const toggleLabelOff = document.getElementById('toggleLabelOff');
         const toggleLabelOn = document.getElementById('toggleLabelOn');
         
+        // Mobile bottom bar elements (will be set after DOM loads)
+        let mobilePlayButton;
+        let mobileToggleBottom;
+        
         let currentVolume = 0;
         let audioContext;
         let videoSource, droneSource, gainNode;
@@ -785,6 +798,69 @@
         // Mobile toggle event handler
         mobileToggle.addEventListener('click', handleMobileToggle);
         
+        // Mobile play button functionality
+        function handleMobilePlayButton() {
+            console.log('Mobile play button clicked');
+            console.log('Video paused:', videoPlayer.paused);
+            if (videoPlayer.paused) {
+                videoPlayer.play().catch(e => console.log('Play failed:', e));
+            } else {
+                videoPlayer.pause();
+            }
+        }
+        
+        // Mobile toggle bottom functionality  
+        function handleMobileToggleBottom() {
+            const newVolume = currentVolume > 0 ? 0 : 50;
+            currentVolume = newVolume;
+            
+            // Setup audio context on first interaction
+            if (!isAudioSetup) {
+                setupAudioContext();
+            }
+            
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            setDroneVolume(currentVolume);
+            updateUI(currentVolume);
+            updateMobileToggle(currentVolume);
+            
+            // Update bottom toggle visual state
+            const knob = mobileToggleBottom.querySelector('.mobile-toggle-knob');
+            if (currentVolume > 0) {
+                knob.style.transform = 'translateX(30px)';
+                mobileToggleBottom.style.background = '#ff9500';
+            } else {
+                knob.style.transform = 'translateX(0px)';
+                mobileToggleBottom.style.background = '#333';
+            }
+        }
+        
+        // Setup mobile controls after DOM loads
+        function setupMobileControls() {
+            mobilePlayButton = document.getElementById('mobilePlayButton');
+            mobileToggleBottom = document.getElementById('mobileToggleBottom');
+            
+            if (mobilePlayButton) {
+                console.log('Mobile play button found, adding listener');
+                mobilePlayButton.addEventListener('click', handleMobilePlayButton);
+            } else {
+                console.log('Mobile play button not found');
+            }
+            
+            if (mobileToggleBottom) {
+                console.log('Mobile toggle bottom found, adding listener');
+                mobileToggleBottom.addEventListener('click', handleMobileToggleBottom);
+            } else {
+                console.log('Mobile toggle bottom not found');
+            }
+        }
+        
+        // Call setup after page loads
+        document.addEventListener('DOMContentLoaded', setupMobileControls);
+        
         // Sync drone audio with video playback
         videoPlayer.addEventListener('play', function() {
             droneAudio.currentTime = videoPlayer.currentTime;
@@ -837,5 +913,20 @@
             setupFallbackAudio();
         }
     </script>
+
+    <!-- Mobile Bottom Control Bar -->
+    <div class="mobile-bottom-bar" id="mobileBottomBar" style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(26, 26, 26, 0.98); padding: 15px; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div class="bottom-bar-content" style="display: flex; align-items: center; justify-content: space-between;">
+            <button class="mobile-play-button" id="mobilePlayButton" style="width: 50px; height: 50px; border-radius: 50%; background: white; border: none; display: flex; align-items: center; justify-content: center;">
+                <div class="play-icon" style="width: 0; height: 0; border-left: 12px solid #333; border-top: 8px solid transparent; border-bottom: 8px solid transparent; margin-left: 3px;"></div>
+            </button>
+            <div class="bottom-bar-controls" style="display: flex; align-items: center; gap: 15px;">
+                <div class="bottom-bar-label" style="color: white; font-size: 1rem;">Drone Sound</div>
+                <div class="mobile-toggle-bottom" id="mobileToggleBottom" style="width: 60px; height: 30px; background: #333; border-radius: 15px; position: relative; cursor: pointer;">
+                    <div class="mobile-toggle-knob" style="width: 26px; height: 26px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.3s;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
