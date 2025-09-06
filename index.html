@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resistance Through Harmony</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 90%;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #ffffff, #cccccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            color: #cccccc;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .drone-toggle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toggle-label {
+            font-size: 1.2em;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .switch {
+            position: relative;
+            width: 80px;
+            height: 40px;
+            background-color: #333;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #555;
+        }
+
+        .switch.active {
+            background-color: #ff4444;
+            border-color: #ff6666;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+        }
+
+        .slider {
+            position: absolute;
+            top: 50%;
+            left: 4px;
+            width: 32px;
+            height: 32px;
+            background: #ffffff;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .switch.active .slider {
+            left: 44px;
+            background: #ffffff;
+        }
+
+        .drone-icon {
+            width: 20px;
+            height: 20px;
+            fill: #666;
+            transition: all 0.3s ease;
+        }
+
+        .switch.active .drone-icon {
+            fill: #ff4444;
+        }
+
+        .description {
+            max-width: 700px;
+            margin: 40px auto;
+            text-align: left;
+            line-height: 1.8;
+            color: #dddddd;
+            background: rgba(255,255,255,0.05);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #fff;
+        }
+
+        .description h3 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: 1.1em;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .status.with-drone {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff9999;
+        }
+
+        .status.without-drone {
+            background: rgba(68, 255, 68, 0.2);
+            border: 1px solid #44ff44;
+            color: #99ff99;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2em;
+            }
+            
+            .controls {
+                gap: 20px;
+            }
+            
+            .description {
+                text-align: center;
+                padding: 20px;
+            }
+        }
+
+        .audio-visualizer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(transparent, rgba(255,68,68,0.1));
+            display: none;
+        }
+
+        .switch.active ~ .video-container .audio-visualizer {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Resistance Through Harmony</h1>
+        <p class="subtitle">
+            When the drone's surveillance becomes a constant companion, 
+            music transforms fear into defiance. This is the sound of resistance - 
+            finding strength in harmony with the machinery of oppression.
+        </p>
+
+        <div class="video-container">
+            <video id="videoPlayer" controls>
+                <source src="song_cleaned.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="audio-visualizer"></div>
+        </div>
+
+        <div class="controls">
+            <div class="drone-toggle">
+                <div class="toggle-label">Drone Sound</div>
+                <div class="switch" id="droneToggle">
+                    <div class="slider">
+                        <svg class="drone-icon" viewBox="0 0 24 24">
+                            <path d="M12 2L13.09 8.26L19 7L17.74 13.09L22 14L16 16L17.74 10.91L11.65 12.65L10 18L8.35 12.65L2.26 10.91L4 16L0 14L4.26 13.09L3 7L8.91 8.26L12 2Z"/>
+                            <circle cx="12" cy="12" r="2"/>
+                            <rect x="11" y="14" width="2" height="4"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status" id="statusText">Experience both versions</div>
+
+        <div class="description">
+            <h3>The Art of Sonic Resistance</h3>
+            <p>
+                Living under constant surveillance, where the hum of drones becomes the soundtrack to daily life, 
+                this artist discovered something profound: by singing in harmony with the drone's frequency, 
+                the oppressive sound transforms into an instrument of resistance.
+            </p>
+            <p>
+                The toggle above lets you experience both versions - with and without the drone's presence. 
+                Notice how the music was composed not despite the drone, but with it, 
+                turning a symbol of fear into a foundation for beautiful, defiant art.
+            </p>
+            <p>
+                This is more than music; it's a testament to the human spirit's ability to find 
+                beauty and strength even in the darkest circumstances.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const droneToggle = document.getElementById('droneToggle');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const statusText = document.getElementById('statusText');
+        
+        let isDroneActive = false;
+        
+        // Video sources
+        const withDroneVideo = 'song.mp4';          // Original with drone
+        const withoutDroneVideo = 'song_cleaned.mp4'; // Cleaned version
+        
+        function updateVideoSource() {
+            const currentTime = videoPlayer.currentTime;
+            const wasPlaying = !videoPlayer.paused;
+            
+            if (isDroneActive) {
+                videoPlayer.src = withDroneVideo;
+                statusText.textContent = 'Playing with drone sound - The complete resistance symphony';
+                statusText.className = 'status with-drone';
+            } else {
+                videoPlayer.src = withoutDroneVideo;
+                statusText.textContent = 'Playing without drone - Isolated musical resistance';
+                statusText.className = 'status without-drone';
+            }
+            
+            // Restore playback position and state
+            videoPlayer.addEventListener('loadeddata', function onLoaded() {
+                videoPlayer.currentTime = currentTime;
+                if (wasPlaying) {
+                    videoPlayer.play();
+                }
+                videoPlayer.removeEventListener('loadeddata', onLoaded);
+            });
+        }
+        
+        droneToggle.addEventListener('click', function() {
+            isDroneActive = !isDroneActive;
+            
+            if (isDroneActive) {
+                droneToggle.classList.add('active');
+            } else {
+                droneToggle.classList.remove('active');
+            }
+            
+            updateVideoSource();
+        });
+        
+        // Initialize with drone sound
+        statusText.textContent = 'Click the drone toggle to switch between versions';
+        statusText.className = 'status with-drone';
+        
+        // Add keyboard shortcut
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+                if (videoPlayer.paused) {
+                    videoPlayer.play();
+                } else {
+                    videoPlayer.pause();
+                }
+            } else if (e.code === 'KeyD') {
+                droneToggle.click();
+            }
+        });
+        
+        // Add touch support for mobile
+        droneToggle.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            this.click();
+        });
+    </script>
+</body>
+</html>
