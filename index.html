@@ -221,6 +221,11 @@
                 <source src="song_cleaned.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
+            <audio id="droneAudio" loop preload="auto">
+                <source src="zannana_infinite_harmonic.wav" type="audio/wav">
+                <source src="zannana_infinite_harmonic.mp3" type="audio/mpeg">
+                <source src="zannana.mp3" type="audio/mpeg">
+            </audio>
             <div class="audio-visualizer"></div>
         </div>
 
@@ -239,7 +244,7 @@
             </div>
         </div>
 
-        <div class="status" id="statusText">Experience both versions</div>
+        <div class="status" id="statusText">Click the drone toggle to add/remove drone sound</div>
 
         <div class="description">
             <h3>The Art of Sonic Resistance</h3>
@@ -263,53 +268,138 @@
     <script>
         const droneToggle = document.getElementById('droneToggle');
         const videoPlayer = document.getElementById('videoPlayer');
+        const droneAudio = document.getElementById('droneAudio');
         const statusText = document.getElementById('statusText');
         
         let isDroneActive = false;
+        let audioContext;
+        let videoSource, droneSource, gainNode;
+        let isAudioSetup = false;
         
-        // Video sources
-        const withDroneVideo = 'song.mp4';          // Original with drone
-        const withoutDroneVideo = 'song_cleaned.mp4'; // Cleaned version
+        // Initialize Web Audio API for seamless audio mixing
+        function setupAudioContext() {
+            if (isAudioSetup) return;
+            
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create audio sources
+                videoSource = audioContext.createMediaElementSource(videoPlayer);
+                droneSource = audioContext.createMediaElementSource(droneAudio);
+                
+                // Create gain node for drone volume control
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = 0; // Start with drone muted
+                
+                // Connect audio graph: video -> output, drone -> gain -> output
+                videoSource.connect(audioContext.destination);
+                droneSource.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                isAudioSetup = true;
+                console.log('Audio context initialized successfully');
+            } catch (error) {
+                console.error('Web Audio API not supported:', error);
+                // Fallback to simple play/pause method
+                setupFallbackAudio();
+            }
+        }
         
-        function updateVideoSource() {
-            const currentTime = videoPlayer.currentTime;
-            const wasPlaying = !videoPlayer.paused;
+        function setupFallbackAudio() {
+            // Simple fallback for browsers that don't support Web Audio API
+            droneAudio.volume = 0;
+        }
+        
+        function toggleDroneAudio() {
+            if (audioContext && gainNode) {
+                // Smooth transition using Web Audio API
+                const fadeTime = 0.1; // 100ms fade
+                const currentTime = audioContext.currentTime;
+                
+                if (isDroneActive) {
+                    // Fade in drone
+                    gainNode.gain.setValueAtTime(0, currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.6, currentTime + fadeTime);
+                } else {
+                    // Fade out drone
+                    gainNode.gain.setValueAtTime(gainNode.gain.value, currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0, currentTime + fadeTime);
+                }
+            } else {
+                // Fallback method
+                if (isDroneActive) {
+                    droneAudio.volume = 0.6;
+                } else {
+                    droneAudio.volume = 0;
+                }
+            }
+        }
+        
+        function syncDroneWithVideo() {
+            // Keep drone audio in sync with video
+            if (Math.abs(droneAudio.currentTime - videoPlayer.currentTime) > 0.2) {
+                droneAudio.currentTime = videoPlayer.currentTime;
+            }
+        }
+        
+        // Event handlers
+        droneToggle.addEventListener('click', function() {
+            isDroneActive = !isDroneActive;
+            
+            // Setup audio context on first user interaction (required by browsers)
+            if (!isAudioSetup) {
+                setupAudioContext();
+            }
+            
+            // Resume audio context if suspended (required by some browsers)
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
             
             if (isDroneActive) {
-                videoPlayer.src = withDroneVideo;
+                droneToggle.classList.add('active');
                 statusText.textContent = 'Playing with drone sound - The complete resistance symphony';
                 statusText.className = 'status with-drone';
             } else {
-                videoPlayer.src = withoutDroneVideo;
+                droneToggle.classList.remove('active');
                 statusText.textContent = 'Playing without drone - Isolated musical resistance';
                 statusText.className = 'status without-drone';
             }
             
-            // Restore playback position and state
-            videoPlayer.addEventListener('loadeddata', function onLoaded() {
-                videoPlayer.currentTime = currentTime;
-                if (wasPlaying) {
-                    videoPlayer.play();
-                }
-                videoPlayer.removeEventListener('loadeddata', onLoaded);
-            });
-        }
-        
-        droneToggle.addEventListener('click', function() {
-            isDroneActive = !isDroneActive;
-            
-            if (isDroneActive) {
-                droneToggle.classList.add('active');
-            } else {
-                droneToggle.classList.remove('active');
-            }
-            
-            updateVideoSource();
+            toggleDroneAudio();
         });
         
-        // Initialize with drone sound
-        statusText.textContent = 'Click the drone toggle to switch between versions';
-        statusText.className = 'status with-drone';
+        // Sync drone audio with video playback
+        videoPlayer.addEventListener('play', function() {
+            if (isDroneActive) {
+                droneAudio.currentTime = videoPlayer.currentTime;
+                droneAudio.play().catch(e => console.log('Drone audio play failed:', e));
+            }
+        });
+        
+        videoPlayer.addEventListener('pause', function() {
+            droneAudio.pause();
+        });
+        
+        videoPlayer.addEventListener('seeked', function() {
+            if (isDroneActive) {
+                droneAudio.currentTime = videoPlayer.currentTime;
+                if (!videoPlayer.paused) {
+                    droneAudio.play().catch(e => console.log('Drone audio play failed:', e));
+                }
+            }
+        });
+        
+        // Periodic sync to prevent drift
+        setInterval(() => {
+            if (!videoPlayer.paused && isDroneActive) {
+                syncDroneWithVideo();
+            }
+        }, 1000);
+        
+        // Initialize
+        statusText.textContent = 'Click the drone toggle to add/remove drone sound';
+        statusText.className = 'status without-drone';
         
         // Add keyboard shortcut
         document.addEventListener('keydown', function(e) {
@@ -330,6 +420,9 @@
             e.preventDefault();
             this.click();
         });
+        
+        // Preload drone audio
+        droneAudio.load();
     </script>
 </body>
 </html>
