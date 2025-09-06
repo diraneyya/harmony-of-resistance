@@ -76,66 +76,84 @@
             flex-wrap: wrap;
         }
 
-        .drone-toggle {
+        .drone-control {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 15px;
+            min-width: 300px;
         }
 
-        .toggle-label {
+        .control-label {
             font-size: 1.2em;
             color: #ffffff;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
-        .switch {
-            position: relative;
-            width: 80px;
-            height: 40px;
-            background-color: #333;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #555;
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
         }
 
-        .switch.active {
-            background-color: #ff4444;
-            border-color: #ff6666;
+        .volume-label {
+            font-size: 0.9em;
+            color: #cccccc;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .volume-slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #333;
+            outline: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .volume-slider.active {
+            background: linear-gradient(to right, #333 0%, #ff4444 100%);
+        }
+
+        .volume-slider.active::-webkit-slider-thumb {
+            background: #ff4444;
             box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
         }
 
-        .slider {
-            position: absolute;
-            top: 50%;
-            left: 4px;
-            width: 32px;
-            height: 32px;
-            background: #ffffff;
-            border-radius: 50%;
-            transform: translateY(-50%);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
+        .volume-slider.active::-moz-range-thumb {
+            background: #ff4444;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
         }
 
-        .switch.active .slider {
-            left: 44px;
-            background: #ffffff;
-        }
-
-        .drone-icon {
-            width: 20px;
-            height: 20px;
-            fill: #666;
-            transition: all 0.3s ease;
-        }
-
-        .switch.active .drone-icon {
-            fill: #ff4444;
+        .volume-display {
+            font-size: 1em;
+            color: #ffffff;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
         }
 
         .description {
@@ -202,7 +220,7 @@
             display: none;
         }
 
-        .switch.active ~ .video-container .audio-visualizer {
+        .audio-visualizer.active {
             display: block;
         }
     </style>
@@ -216,35 +234,31 @@
             finding strength in harmony with the machinery of oppression.
         </p>
 
+        <div class="status" id="statusText">Adjust the drone volume slider below to add/remove drone sound</div>
+        
+        <div class="controls">
+            <div class="drone-control">
+                <div class="control-label">Drone Volume</div>
+                <div class="slider-container">
+                    <span class="volume-label">Off</span>
+                    <input type="range" id="droneSlider" min="0" max="100" value="0" class="volume-slider">
+                    <span class="volume-label">Max</span>
+                </div>
+                <div class="volume-display" id="volumeDisplay">0%</div>
+            </div>
+        </div>
+
         <div class="video-container">
             <video id="videoPlayer" controls>
                 <source src="song_cleaned.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
             <audio id="droneAudio" loop preload="auto">
-                <source src="zannana_infinite_harmonic.wav" type="audio/wav">
-                <source src="zannana_infinite_harmonic.mp3" type="audio/mpeg">
-                <source src="zannana.mp3" type="audio/mpeg">
+                <source src="zannana_improved_exact.wav" type="audio/mpeg">
             </audio>
             <div class="audio-visualizer"></div>
         </div>
 
-        <div class="controls">
-            <div class="drone-toggle">
-                <div class="toggle-label">Drone Sound</div>
-                <div class="switch" id="droneToggle">
-                    <div class="slider">
-                        <svg class="drone-icon" viewBox="0 0 24 24">
-                            <path d="M12 2L13.09 8.26L19 7L17.74 13.09L22 14L16 16L17.74 10.91L11.65 12.65L10 18L8.35 12.65L2.26 10.91L4 16L0 14L4.26 13.09L3 7L8.91 8.26L12 2Z"/>
-                            <circle cx="12" cy="12" r="2"/>
-                            <rect x="11" y="14" width="2" height="4"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="status" id="statusText">Click the drone toggle to add/remove drone sound</div>
 
         <div class="description">
             <h3>The Art of Sonic Resistance</h3>
@@ -266,12 +280,14 @@
     </div>
 
     <script>
-        const droneToggle = document.getElementById('droneToggle');
+        const droneSlider = document.getElementById('droneSlider');
         const videoPlayer = document.getElementById('videoPlayer');
         const droneAudio = document.getElementById('droneAudio');
         const statusText = document.getElementById('statusText');
+        const volumeDisplay = document.getElementById('volumeDisplay');
+        const audioVisualizer = document.querySelector('.audio-visualizer');
         
-        let isDroneActive = false;
+        let currentVolume = 0;
         let audioContext;
         let videoSource, droneSource, gainNode;
         let isAudioSetup = false;
@@ -308,30 +324,31 @@
         function setupFallbackAudio() {
             // Simple fallback for browsers that don't support Web Audio API
             droneAudio.volume = 0;
+            isAudioSetup = true;
         }
         
-        function toggleDroneAudio() {
+        function setDroneVolume(volume) {
+            const normalizedVolume = volume / 100; // Convert 0-100 to 0-1
+            
             if (audioContext && gainNode) {
                 // Smooth transition using Web Audio API
-                const fadeTime = 0.1; // 100ms fade
+                const fadeTime = 0.05; // 50ms fade
                 const currentTime = audioContext.currentTime;
-                
-                if (isDroneActive) {
-                    // Fade in drone
-                    gainNode.gain.setValueAtTime(0, currentTime);
-                    gainNode.gain.linearRampToValueAtTime(0.6, currentTime + fadeTime);
-                } else {
-                    // Fade out drone
-                    gainNode.gain.setValueAtTime(gainNode.gain.value, currentTime);
-                    gainNode.gain.linearRampToValueAtTime(0, currentTime + fadeTime);
-                }
+                gainNode.gain.setValueAtTime(gainNode.gain.value, currentTime);
+                gainNode.gain.linearRampToValueAtTime(normalizedVolume, currentTime + fadeTime);
             } else {
                 // Fallback method
-                if (isDroneActive) {
-                    droneAudio.volume = 0.6;
-                } else {
-                    droneAudio.volume = 0;
+                droneAudio.volume = normalizedVolume;
+            }
+            
+            // Handle drone playback based on volume and video state
+            if (volume > 0) {
+                if (!videoPlayer.paused) {
+                    droneAudio.currentTime = videoPlayer.currentTime;
+                    droneAudio.play().catch(e => console.log('Drone audio play failed:', e));
                 }
+            } else {
+                droneAudio.pause();
             }
         }
         
@@ -342,9 +359,25 @@
             }
         }
         
+        function updateUI(volume) {
+            volumeDisplay.textContent = volume + '%';
+            
+            if (volume > 0) {
+                droneSlider.classList.add('active');
+                audioVisualizer.classList.add('active');
+                statusText.textContent = `Playing with drone sound (${volume}%) - The complete resistance symphony`;
+                statusText.className = 'status with-drone';
+            } else {
+                droneSlider.classList.remove('active');
+                audioVisualizer.classList.remove('active');
+                statusText.textContent = 'Playing without drone - Isolated musical resistance';
+                statusText.className = 'status without-drone';
+            }
+        }
+        
         // Event handlers
-        droneToggle.addEventListener('click', function() {
-            isDroneActive = !isDroneActive;
+        droneSlider.addEventListener('input', function() {
+            currentVolume = parseInt(this.value);
             
             // Setup audio context on first user interaction (required by browsers)
             if (!isAudioSetup) {
@@ -356,23 +389,14 @@
                 audioContext.resume();
             }
             
-            if (isDroneActive) {
-                droneToggle.classList.add('active');
-                statusText.textContent = 'Playing with drone sound - The complete resistance symphony';
-                statusText.className = 'status with-drone';
-            } else {
-                droneToggle.classList.remove('active');
-                statusText.textContent = 'Playing without drone - Isolated musical resistance';
-                statusText.className = 'status without-drone';
-            }
-            
-            toggleDroneAudio();
+            setDroneVolume(currentVolume);
+            updateUI(currentVolume);
         });
         
         // Sync drone audio with video playback
         videoPlayer.addEventListener('play', function() {
-            if (isDroneActive) {
-                droneAudio.currentTime = videoPlayer.currentTime;
+            droneAudio.currentTime = videoPlayer.currentTime;
+            if (currentVolume > 0) {
                 droneAudio.play().catch(e => console.log('Drone audio play failed:', e));
             }
         });
@@ -382,11 +406,9 @@
         });
         
         videoPlayer.addEventListener('seeked', function() {
-            if (isDroneActive) {
-                droneAudio.currentTime = videoPlayer.currentTime;
-                if (!videoPlayer.paused) {
-                    droneAudio.play().catch(e => console.log('Drone audio play failed:', e));
-                }
+            droneAudio.currentTime = videoPlayer.currentTime;
+            if (!videoPlayer.paused && currentVolume > 0) {
+                droneAudio.play().catch(e => console.log('Drone audio play failed:', e));
             }
         });
         
@@ -398,8 +420,7 @@
         }, 1000);
         
         // Initialize
-        statusText.textContent = 'Click the drone toggle to add/remove drone sound';
-        statusText.className = 'status without-drone';
+        updateUI(0);
         
         // Add keyboard shortcut
         document.addEventListener('keydown', function(e) {
@@ -411,18 +432,19 @@
                     videoPlayer.pause();
                 }
             } else if (e.code === 'KeyD') {
-                droneToggle.click();
+                // Toggle between 0 and 60% volume with D key
+                const newVolume = currentVolume > 0 ? 0 : 60;
+                droneSlider.value = newVolume;
+                droneSlider.dispatchEvent(new Event('input'));
             }
-        });
-        
-        // Add touch support for mobile
-        droneToggle.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            this.click();
         });
         
         // Preload drone audio
         droneAudio.load();
+        // Initialize with proper fallback setup
+        if (!audioContext) {
+            setupFallbackAudio();
+        }
     </script>
 </body>
 </html>
