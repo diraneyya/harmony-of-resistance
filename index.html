@@ -1384,7 +1384,9 @@
         
         // Mobile toggle bottom functionality  
         function handleMobileToggleBottom() {
-            const newVolume = currentVolume > 0 ? 0 : 50;
+            // Changed the toggle behaviour to switch to 100%
+            // This makes it more inline with the KeyD behaviour
+            const newVolume = currentVolume > 0 ? 0 : 100;
             currentVolume = newVolume;
             droneSlider.value = newVolume; // Keep desktop slider in sync
             
