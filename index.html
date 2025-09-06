@@ -936,7 +936,7 @@
                     Your browser does not support the video tag.
                 </video>
                 <audio id="droneAudio" loop preload="auto">
-                    <source src="zannana_improved_exact.wav" type="audio/mpeg">
+                    <source src="zannana_improved_exact.mp3" type="audio/mpeg">
                 </audio>
                 <div class="audio-visualizer"></div>
             </div>
@@ -1101,8 +1101,10 @@
         }
         
         function setDroneVolume(volume) {
-            // Convert 0-100 to 0-0.2 (20% max)
-            const normalizedVolume = (volume / 100) * 0.10; 
+            // Deprecated: Convert 0-100 to 0-0.2 (50% max)
+            // ffmpeg -i zannana_improved_exact.mp3 -filter:a "volume=0.15" \
+            //           zannana_improved_exact_20percent.mp3
+            const normalizedVolume = (volume / 100) * 0.50; 
             
             if (audioContext && gainNode) {
                 // Smooth transition using Web Audio API
