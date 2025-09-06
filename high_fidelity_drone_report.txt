@@ -1,0 +1,21 @@
+HIGH-FIDELITY DRONE ANALYSIS REPORT
+==================================================
+
+Original audio: 0.59s at 44100Hz
+Analysis resolution: 4096 point FFT
+Components found: 7
+
+FREQUENCY COMPONENTS:
+------------------------------
+ 1.   344.5 Hz (amp: 76.649, stability:   4.6, vibrato: 1.784)
+ 2.   581.4 Hz (amp: 51.563, stability:   3.4, vibrato: 0.794)
+ 3.   818.3 Hz (amp: 40.761, stability:   5.3, vibrato: 0.901)
+ 4.    96.9 Hz (amp: 16.001, stability:   2.8, vibrato: 30.620)
+ 5.  1044.4 Hz (amp: 10.907, stability:   3.2, vibrato: 1.438)
+ 6.  1399.7 Hz (amp:  8.840, stability:   1.9, vibrato: 1.426)
+ 7.  1625.8 Hz (amp:  2.612, stability:   1.5, vibrato: 43.394)
+
+NOISE CHARACTERISTICS:
+-------------------------
+Noise level: 0.048
+Spectral slope: -2.48
