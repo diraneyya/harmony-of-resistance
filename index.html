@@ -1056,9 +1056,6 @@
                 }
             }, timeoutDuration);
         }
-        
-        // Initialize loading system
-        setupMediaLoading();
 
         const droneSlider = document.getElementById('droneSlider');
         const videoPlayer = document.getElementById('videoPlayer');
@@ -1491,6 +1488,9 @@
         if (!audioContext) {
             setupFallbackAudio();
         }
+        
+        // Initialize loading system (must be called after all variables and functions are defined)
+        setupMediaLoading();
     </script>
 
     <!-- Mobile Bottom Control Bar -->
