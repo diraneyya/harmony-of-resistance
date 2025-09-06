@@ -1268,7 +1268,7 @@
             // Handle drone playback based on volume and video state
             if (volume > 0) {
                 if (!videoPlayer.paused) {
-                    droneAudio.currentTime = videoPlayer.currentTime;
+                    // Let drone audio loop continuously - don't sync with video
                     droneAudio.play().catch(e => console.log('Drone audio play failed:', e));
                 }
             } else {
@@ -1277,10 +1277,9 @@
         }
         
         function syncDroneWithVideo() {
-            // Keep drone audio in sync with video
-            if (Math.abs(droneAudio.currentTime - videoPlayer.currentTime) > 0.2) {
-                droneAudio.currentTime = videoPlayer.currentTime;
-            }
+            // Drone audio loops continuously on its own - no sync needed
+            // This function is kept for compatibility but does nothing
+            return;
         }
         
         function updateUI(volume) {
@@ -1466,7 +1465,7 @@
         });
         
         videoPlayer.addEventListener('seeked', function() {
-            droneAudio.currentTime = videoPlayer.currentTime;
+            // Don't sync drone audio - let it loop continuously
             if (!videoPlayer.paused && currentVolume > 0) {
                 droneAudio.play().catch(e => console.log('Drone audio play failed:', e));
             }
