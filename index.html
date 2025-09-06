@@ -976,9 +976,18 @@
             const percentage = (completed / 3) * 100;
             loadingProgressBar.style.width = percentage + '%';
             
+            // Get current video info for display
+            const videoSizes = {
+                ultra_low: '3.2MB',
+                low: '7.3MB', 
+                high: '24MB'
+            };
+            const currentSize = videoSizes[detectedBandwidth] || '24MB';
+            const qualityText = detectedBandwidth === 'unknown' ? 'high' : detectedBandwidth;
+            
             // Update loading text based on progress
             if (loadingProgress.video && loadingProgress.audio && !loadingProgress.videoBuffered) {
-                loadingSubtext.textContent = 'Buffering video... (33MB)';
+                loadingSubtext.textContent = `Buffering video... (${currentSize})`;
             } else if (loadingProgress.video && loadingProgress.audio && loadingProgress.videoBuffered) {
                 loadingSubtext.textContent = 'Ready to experience resistance through harmony';
                 setTimeout(() => {
