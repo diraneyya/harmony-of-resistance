@@ -293,10 +293,10 @@
             left: 0;
             right: 0;
             background: rgba(26, 26, 26, 0.98);
-            background-image: url('drone.png');
-            background-size: contain;
+            background-image: url('drone.jpg');
+            background-size: cover;
             background-repeat: no-repeat;
-            background-position: center;
+            background-position: 50% 35%;
             background-blend-mode: overlay;
             backdrop-filter: blur(15px);
             padding: 12px 20px;
@@ -312,10 +312,10 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: url('drone.png');
-            background-size: contain;
+            background-image: url('drone.jpg');
+            background-size: cover;
             background-repeat: no-repeat;
-            background-position: center;
+            background-position: 50% 35%;
             opacity: 0.15;
             pointer-events: none;
             z-index: -1;
@@ -505,8 +505,8 @@
             }
             
             .video-container video {
-                width: 100%;
-                height: auto;
+                width: auto;
+                height: 90%;
                 max-height: 90vh;
                 object-fit: contain;
             }
