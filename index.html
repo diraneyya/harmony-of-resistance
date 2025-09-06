@@ -285,18 +285,189 @@
             transition: all 0.3s ease;
         }
 
-        @media (min-width: 769px) {
+        /* Mobile Bottom Bar Styles */
+        .mobile-bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 26, 0.98);
+            backdrop-filter: blur(15px);
+            padding: 12px 20px;
+            z-index: 1000;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.4);
+        }
+
+        .bottom-bar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .mobile-play-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff, #e0e0e0);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .mobile-play-button:hover {
+            transform: scale(1.05);
+        }
+
+        .mobile-play-button.playing {
+            background: linear-gradient(135deg, #ff9500, #ff6500);
+        }
+
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-left: 12px solid #333;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            margin-left: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-play-button.playing .play-icon {
+            border: none;
+            width: 12px;
+            height: 16px;
+            background: linear-gradient(to right, #fff 0%, #fff 35%, transparent 35%, transparent 65%, #fff 65%, #fff 100%);
+            margin-left: 0;
+        }
+
+        .bottom-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .bottom-bar-label {
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .mobile-toggle-bottom {
+            width: 60px;
+            height: 30px;
+            background: #333;
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-toggle-bottom.active {
+            background: linear-gradient(135deg, #ff9500, #ff6500);
+        }
+
+        .mobile-toggle-bottom .mobile-toggle-knob {
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .mobile-toggle-bottom.active .mobile-toggle-knob {
+            transform: translateX(30px);
+        }
+
+        @media (min-width: 1025px) {
+            body {
+                height: 100vh;
+                overflow: hidden;
+            }
+            
             .mobile-toggle, .toggle-labels {
                 display: none;
             }
             .mobile-bottom-bar {
                 display: none !important;
             }
+            
+            .container {
+                max-width: 1400px;
+                display: flex;
+                gap: 40px;
+                align-items: flex-start;
+                text-align: left;
+                height: 100vh;
+                overflow: hidden;
+            }
+            
+            .content-left {
+                flex: 1;
+                min-width: 0;
+                height: 100vh;
+                overflow-y: auto;
+                padding-right: 10px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            
+            .content-right {
+                width: 500px;
+                flex-shrink: 0;
+                height: 100vh;
+                display: flex;
+                align-items: center;
+            }
+            
+            .video-container {
+                width: 100%;
+                height: auto;
+            }
+            
+            .video-container video {
+                width: 100%;
+                height: auto;
+                max-height: 90vh;
+                object-fit: contain;
+            }
+            
+            .status {
+                text-align: center;
+            }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             body {
                 padding: 10px 0 80px 0;
+            }
+            
+            /* Hide desktop elements on mobile */
+            .mobile-toggle, .toggle-labels {
+                display: none !important;
+            }
+            
+            .status {
+                display: none !important;
+            }
+            
+            .volume-label {
+                display: none !important;
+            }
+            
+            .volume-display {
+                display: none !important;
             }
             
             .container {
@@ -492,54 +663,66 @@
     </div>
 
     <div class="container">
-        <h1 class="title">Resistance Through Harmony</h1>
-        <p class="subtitle">
-            Living under constant surveillance, where the hum of drones becomes the soundtrack to daily life, 
-            this artist discovered something profound: by singing in harmony with the drone's frequency, 
-            the oppressive sound transforms into an instrument of resistance.
-        </p>
+        <div class="content-left">
+            <h1 class="title">Resistance Through Harmony</h1>
+            <p class="subtitle">
+                Living under constant surveillance, where the hum of drones becomes the soundtrack to daily life, 
+                this artist discovered something profound: by singing in harmony with the drone's frequency, 
+                the oppressive sound transforms into an instrument of resistance.
+            </p>
 
-        <div class="status" id="statusText">Adjust the drone volume slider below to add/remove drone sound</div>
-        
-        <div class="controls">
-            <div class="drone-control">
-                <div class="control-label">Drone Volume</div>
-                <div class="slider-container">
-                    <span class="volume-label">Off</span>
-                    <input type="range" id="droneSlider" min="0" max="100" value="0" class="volume-slider">
-                    <span class="volume-label">Max</span>
+            <div class="status" id="statusText">Adjust the drone volume slider below to add/remove drone sound</div>
+            
+            <div class="controls">
+                <div class="drone-control">
+                    <div class="control-label">Drone Volume</div>
+                    <div class="slider-container">
+                        <span class="volume-label">Off</span>
+                        <input type="range" id="droneSlider" min="0" max="100" value="0" class="volume-slider">
+                        <span class="volume-label">Max</span>
+                    </div>
+                    
+                    <!-- Mobile Toggle (hidden on desktop) -->
+                    <div class="mobile-toggle" id="mobileToggle">
+                        <div class="mobile-toggle-knob"></div>
+                    </div>
+                    <div class="toggle-labels">
+                        <span class="toggle-label" id="toggleLabelOff">Off</span>
+                        <span class="toggle-label" id="toggleLabelOn">Drone 50%</span>
+                    </div>
+                    
+                    <div class="volume-display" id="volumeDisplay">0%</div>
                 </div>
-                
-                <!-- Mobile Toggle (hidden on desktop) -->
-                <div class="mobile-toggle" id="mobileToggle">
-                    <div class="mobile-toggle-knob"></div>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-icon">💡</div>
+                <div class="tip-content">
+                    <p>Use the volume slider above to control the drone audio layer. By changing the volume you can more clearly understand how the artist harmonized with the oppressive surveillance soundtrack.</p>
+                    <p class="tip-shortcuts">Keyboard shortcuts (when on desktop): <kbd>Space</kbd> to play/pause video • <kbd>D</kbd> to toggle drone volume</p>
                 </div>
-                <div class="toggle-labels">
-                    <span class="toggle-label" id="toggleLabelOff">Off</span>
-                    <span class="toggle-label" id="toggleLabelOn">Drone 50%</span>
-                </div>
-                
-                <div class="volume-display" id="volumeDisplay">0%</div>
             </div>
         </div>
 
-        <div class="video-container">
-            <video id="videoPlayer" controls>
-                <source src="song_cleaned.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-            <audio id="droneAudio" loop preload="auto">
-                <source src="zannana_improved_exact.wav" type="audio/mpeg">
-            </audio>
-            <div class="audio-visualizer"></div>
-        </div>
-
-
-        <div class="tip-box">
-            <div class="tip-icon">💡</div>
-            <div class="tip-content">
-                <p>Use the volume slider above to control the drone audio layer. By changing the volume you can more clearly understand how the artist harmonized with the oppressive surveillance soundtrack.</p>
-                <p class="tip-shortcuts">Keyboard shortcuts (when on desktop): <kbd>Space</kbd> to play/pause video • <kbd>D</kbd> to toggle drone volume</p>
+        <div class="content-right">
+            <div class="video-container">
+                <video id="videoPlayer" controls>
+                    <source src="song_cleaned.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <audio id="droneAudio" loop preload="auto">
+                    <source src="zannana_improved_exact.wav" type="audio/mpeg">
+                </audio>
+                <div class="audio-visualizer"></div>
+            </div>
+            
+            <!-- Tip box shows under video on mobile -->
+            <div class="tip-box mobile-tip">
+                <div class="tip-icon">💡</div>
+                <div class="tip-content">
+                    <p>Use the toggle at the bottom to add/remove drone sound and experience the artist's resistance.</p>
+                    <p class="tip-shortcuts">Tap the toggle to switch between modes</p>
+                </div>
             </div>
         </div>
     </div>
@@ -826,16 +1009,20 @@
             setDroneVolume(currentVolume);
             updateUI(currentVolume);
             updateMobileToggle(currentVolume);
-            
-            // Update bottom toggle visual state
-            const knob = mobileToggleBottom.querySelector('.mobile-toggle-knob');
-            if (currentVolume > 0) {
-                knob.style.transform = 'translateX(30px)';
-                mobileToggleBottom.style.background = '#ff9500';
-            } else {
-                knob.style.transform = 'translateX(0px)';
-                mobileToggleBottom.style.background = '#333';
-            }
+            updateMobileBottomToggle(currentVolume);
+        }
+        
+        // Update mobile bottom toggle visual state
+        function updateMobileBottomToggle(volume) {
+            if (!mobileToggleBottom) return;
+            mobileToggleBottom.classList.toggle('active', volume > 0);
+        }
+        
+        // Update mobile play button visual state
+        function updateMobilePlayButton() {
+            if (!mobilePlayButton || !videoPlayer) return;
+            const isPlaying = !videoPlayer.paused;
+            mobilePlayButton.classList.toggle('playing', isPlaying);
         }
         
         // Setup mobile controls after DOM loads
@@ -855,6 +1042,17 @@
                 mobileToggleBottom.addEventListener('click', handleMobileToggleBottom);
             } else {
                 console.log('Mobile toggle bottom not found');
+            }
+            
+            // Initialize states
+            updateMobileBottomToggle(0);
+            updateMobilePlayButton();
+            
+            // Update play button when video state changes
+            if (videoPlayer) {
+                videoPlayer.addEventListener('play', updateMobilePlayButton);
+                videoPlayer.addEventListener('pause', updateMobilePlayButton);
+                videoPlayer.addEventListener('ended', updateMobilePlayButton);
             }
         }
         
@@ -915,15 +1113,15 @@
     </script>
 
     <!-- Mobile Bottom Control Bar -->
-    <div class="mobile-bottom-bar" id="mobileBottomBar" style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(26, 26, 26, 0.98); padding: 15px; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.1);">
-        <div class="bottom-bar-content" style="display: flex; align-items: center; justify-content: space-between;">
-            <button class="mobile-play-button" id="mobilePlayButton" style="width: 50px; height: 50px; border-radius: 50%; background: white; border: none; display: flex; align-items: center; justify-content: center;">
-                <div class="play-icon" style="width: 0; height: 0; border-left: 12px solid #333; border-top: 8px solid transparent; border-bottom: 8px solid transparent; margin-left: 3px;"></div>
+    <div class="mobile-bottom-bar" id="mobileBottomBar">
+        <div class="bottom-bar-content">
+            <button class="mobile-play-button" id="mobilePlayButton">
+                <div class="play-icon"></div>
             </button>
-            <div class="bottom-bar-controls" style="display: flex; align-items: center; gap: 15px;">
-                <div class="bottom-bar-label" style="color: white; font-size: 1rem;">Drone Sound</div>
-                <div class="mobile-toggle-bottom" id="mobileToggleBottom" style="width: 60px; height: 30px; background: #333; border-radius: 15px; position: relative; cursor: pointer;">
-                    <div class="mobile-toggle-knob" style="width: 26px; height: 26px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.3s;"></div>
+            <div class="bottom-bar-controls">
+                <div class="bottom-bar-label">Drone Sound</div>
+                <div class="mobile-toggle-bottom" id="mobileToggleBottom">
+                    <div class="mobile-toggle-knob"></div>
                 </div>
             </div>
         </div>
