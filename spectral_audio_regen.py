@@ -179,14 +179,24 @@ class SpectralAudioRegenerator:
         """
         Use phase vocoder technique for seamless time stretching
         """
+        print("Applying phase vocoder time stretching...")
+        
         # Calculate stretch factor
         stretch_factor = duration_seconds / self.duration
+        print(f"Stretching by factor of {stretch_factor:.1f}x")
         
         # Use librosa's phase vocoder
         stft = librosa.stft(self.audio, n_fft=self.n_fft, hop_length=self.hop_length)
-        stretched_stft = librosa.phase_vocoder(stft, rate=1/stretch_factor)
         
-        return librosa.istft(stretched_stft, hop_length=self.hop_length)
+        with tqdm(total=1, desc="Phase vocoder processing") as pbar:
+            stretched_stft = librosa.phase_vocoder(stft, rate=1/stretch_factor)
+            pbar.update(1)
+        
+        print("Converting back to time domain...")
+        result = librosa.istft(stretched_stft, hop_length=self.hop_length)
+        
+        print("Phase vocoder method complete!")
+        return result
     
     def _harmonic_synthesis_method(self, duration_seconds):
         """
