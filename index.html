@@ -491,6 +491,49 @@
                 margin: 15px 0;
             }
             
+            .desktop-play-button {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #ffffff, #e0e0e0);
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+                margin: 20px auto;
+                align-self: center;
+            }
+            
+            .desktop-play-button:hover {
+                transform: scale(1.05);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            }
+            
+            .desktop-play-button.playing {
+                background: linear-gradient(135deg, #ff9500, #ff6500);
+            }
+            
+            .desktop-play-icon {
+                width: 0;
+                height: 0;
+                border-left: 16px solid #333;
+                border-top: 12px solid transparent;
+                border-bottom: 12px solid transparent;
+                margin-left: 4px;
+                transition: all 0.3s ease;
+            }
+            
+            .desktop-play-button.playing .desktop-play-icon {
+                border: none;
+                width: 16px;
+                height: 20px;
+                background: linear-gradient(to right, #fff 0%, #fff 35%, transparent 35%, transparent 65%, #fff 65%, #fff 100%);
+                margin-left: 0;
+            }
+            
             .content-right {
                 width: 500px;
                 flex-shrink: 0;
@@ -616,6 +659,10 @@
             }
             
             .control-label {
+                display: none !important;
+            }
+            
+            .desktop-play-button {
                 display: none !important;
             }
             
@@ -844,6 +891,10 @@
                 this artist discovered something profound: by singing in harmony with the drone's frequency, 
                 the oppressive sound transforms into an instrument of resistance.
             </p>
+
+            <button class="desktop-play-button" id="desktopPlayButton">
+                <div class="desktop-play-icon"></div>
+            </button>
 
             <div class="status" id="statusText">Adjust the drone volume slider below to add/remove drone sound</div>
             
@@ -1278,6 +1329,39 @@
         // Initialize
         updateUI(0);
         updateMobileToggle(0);
+        
+        // Desktop play button functionality
+        function setupDesktopPlayButton() {
+            const desktopPlayButton = document.getElementById('desktopPlayButton');
+            
+            if (!desktopPlayButton) return;
+            
+            desktopPlayButton.addEventListener('click', function() {
+                if (videoPlayer.paused) {
+                    videoPlayer.play().catch(e => console.log('Desktop play failed:', e));
+                } else {
+                    videoPlayer.pause();
+                }
+            });
+            
+            // Update desktop play button visual state
+            function updateDesktopPlayButton() {
+                if (!desktopPlayButton || !videoPlayer) return;
+                const isPlaying = !videoPlayer.paused;
+                desktopPlayButton.classList.toggle('playing', isPlaying);
+            }
+            
+            // Update button state when video state changes
+            videoPlayer.addEventListener('play', updateDesktopPlayButton);
+            videoPlayer.addEventListener('pause', updateDesktopPlayButton);
+            videoPlayer.addEventListener('ended', updateDesktopPlayButton);
+            
+            // Initialize state
+            updateDesktopPlayButton();
+        }
+        
+        // Initialize desktop play button
+        document.addEventListener('DOMContentLoaded', setupDesktopPlayButton);
         
         // Add keyboard shortcut
         document.addEventListener('keydown', function(e) {
