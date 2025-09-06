@@ -264,25 +264,35 @@ if __name__ == "__main__":
     # Initialize with your audio file
     regenerator = SpectralAudioRegenerator("zannana.mp3")
     
-    # Analyze the spectral content
-    regenerator.analyze_spectrum(plot=True)
+    # Analyze the spectral content - saves plot to file instead of showing GUI
+    regenerator.analyze_spectrum(plot=True, save_plot=True)
     
     # Generate different versions
     print("\nGenerating audio with different methods...")
     
     # Method 1: Spectral repeat (recommended for buzzing sounds)
+    print("\n=== Method 1: Spectral Repeat ===")
     audio1 = regenerator.generate_infinite_audio(30, method='spectral_repeat')
     regenerator.save_audio(audio1, "zannana_infinite_spectral.wav")
     
     # Method 2: Harmonic synthesis
+    print("\n=== Method 2: Harmonic Synthesis ===")
     audio2 = regenerator.generate_infinite_audio(30, method='harmonic_synthesis')
     regenerator.save_audio(audio2, "zannana_infinite_harmonic.wav")
     
     # Method 3: Phase vocoder (time stretching)
+    print("\n=== Method 3: Phase Vocoder ===")
     audio3 = regenerator.generate_infinite_audio(30, method='phase_vocoder')
     regenerator.save_audio(audio3, "zannana_infinite_stretched.wav")
     
-    print("\nAll methods complete! Try each generated file to see which works best.")
+    print("\n" + "="*50)
+    print("All methods complete!")
+    print("Generated files:")
+    print("- zannana_infinite_spectral.wav")
+    print("- zannana_infinite_harmonic.wav") 
+    print("- zannana_infinite_stretched.wav")
+    print("- spectral_analysis.png")
+    print("\nTry each generated file to see which works best.")
     print("\nTo play infinite loop in real-time, use:")
     print("regenerator.play_infinite_loop(chunk_duration=10, method='spectral_repeat')")
     
