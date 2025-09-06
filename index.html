@@ -208,6 +208,7 @@
         }
 
         .volume-display {
+            display: none;
             font-size: 1em;
             color: #ffffff;
             font-weight: bold;
@@ -913,7 +914,7 @@
                     </div>
                     <div class="toggle-labels">
                         <span class="toggle-label" id="toggleLabelOff">Off</span>
-                        <span class="toggle-label" id="toggleLabelOn">Drone 50%</span>
+                        <span class="toggle-label" id="toggleLabelOn">On</span>
                     </div>
                     
                     <div class="volume-display" id="volumeDisplay">0%</div>
@@ -1375,8 +1376,8 @@
                     videoPlayer.pause();
                 }
             } else if (e.code === 'KeyD') {
-                // Toggle between 0 and 50% volume with D key
-                const newVolume = currentVolume > 0 ? 0 : 50;
+                // Toggle between 0 and 100% volume with D key
+                const newVolume = currentVolume > 0 ? 0 : 100;
                 currentVolume = newVolume;
                 droneSlider.value = newVolume;
                 
