@@ -23,14 +23,15 @@ A web application that demonstrates artistic resistance through music - showcasi
 - **Frontend**: Single HTML file with embedded CSS/JS
 - **Audio Mixing**: Web Audio API for real-time drone layering
 - **Video Source**: Cleaned version only (`song_cleaned.mp4`)
-- **Drone Audio**: Infinite harmonic reconstruction (`zannana_infinite_harmonic.wav`)
+- **Drone Audio**: Infinite harmonic reconstruction (`zannana_improved_exact.wav`)
+- **Loading System**: Preloads both video and audio files with animated loading screen
 
 ## File Structure
 ```
 project/
 ├── index.html                          # Main web application
 ├── song_cleaned.mp4                    # Video without drone audio
-├── zannana_infinite_harmonic.wav       # Infinite drone audio loop
+├── zannana_improved_exact.wav          # Infinite drone audio loop
 ├── spectral_audio_regen.py            # Original audio generation script
 ├── harmonic_buzz_removal.py           # Noise removal tool
 ├── improved_buzz_remover.py           # Advanced noise removal
@@ -66,25 +67,29 @@ Key parameters for spectral subtraction:
 - **Web Audio API**: Real-time audio graph mixing
 - **Fallback Mode**: Simple volume control for unsupported browsers
 - **Synchronization**: Keeps drone audio locked to video timeline
-- **Smooth Transitions**: 100ms fade in/out when toggling
+- **Smooth Transitions**: 50ms fade in/out when toggling
+- **Volume Range**: Drone audio limited to 20% maximum volume for optimal mixing
 
 ### User Interface
-- **Drone Toggle**: Visual switch with custom SVG icon
-- **Status Display**: Dynamic text showing current playback mode
-- **Responsive Design**: Works on mobile and desktop
+- **Loading Animation**: Animated spinner with progress bar during file preloading
+- **Drone Volume Control**: Smooth slider for precise volume adjustment (0-100%)
+- **Status Display**: Dynamic text with gradient color system (yellow → red based on volume percentage)
+- **Responsive Design**: Works on mobile and desktop with adaptive layouts
 - **Keyboard Controls**: 
   - Spacebar: Play/pause video
-  - 'D' key: Toggle drone audio
+  - 'D' key: Toggle drone volume (0% ↔ 50%)
 
 ### Technical Challenges Solved
-1. **No Page Reload**: Uses separate audio element + Web Audio API instead of video source switching
-2. **Audio Sync**: Periodic sync checks prevent drift between video and drone audio
-3. **Browser Compatibility**: Graceful fallback for browsers without Web Audio API support
-4. **Mobile Support**: Touch event handling and audio context resumption
+1. **Media Preloading**: Loading animation ensures both video and audio files are cached before interaction
+2. **No Page Reload**: Uses separate audio element + Web Audio API instead of video source switching
+3. **Audio Sync**: Periodic sync checks prevent drift between video and drone audio
+4. **Browser Compatibility**: Graceful fallback for browsers without Web Audio API support
+5. **Mobile Support**: Touch event handling and audio context resumption
+6. **Loading States**: Error handling and fallback timeout for failed media loads
 
 ## Deployment (GitHub Pages)
 1. Create new repository
-2. Upload files: `index.html`, `song_cleaned.mp4`, `zannana_infinite_harmonic.wav`
+2. Upload files: `index.html`, `song_cleaned.mp4`, `zannana_improved_exact.wav`
 3. Enable Pages in repository settings
 4. Site available at: `https://username.github.io/repository-name`
 
@@ -105,10 +110,12 @@ The spectral analysis revealed the drone consists primarily of harmonic frequenc
 - Real-time mixing without artifacts
 
 ### Performance Optimizations
-- Preload drone audio with `preload="auto"`
+- **Media Preloading**: Loading screen ensures files are cached before user interaction
+- **Progressive Loading**: Visual feedback with progress bar during file loading
 - Use `createMediaElementSource()` to avoid audio copying
 - Minimal DOM manipulation during playback
 - Efficient sync checking (1-second intervals)
+- **Loading Timeout**: 10-second fallback prevents infinite loading states
 
 ### Browser Considerations
 - **Chrome/Safari**: Full Web Audio API support
@@ -126,8 +133,38 @@ The project demonstrates how oppressive surveillance technology can be transform
 - Social sharing functionality
 - Multi-language support for broader impact
 
+## Recent Updates
+
+### Gradient Color System (Latest)
+- **Dynamic Status Colors**: Banner color transitions smoothly from yellow (0%) to red (100%)
+- **Real-time Updates**: Color changes instantly as user adjusts volume slider
+- **RGB Calculation**: Yellow (255,255,0) interpolates to Red (255,0,0) based on volume ratio
+- **CSS Integration**: Inline styles override default classes for gradient effect
+- **Accessibility**: Maintains sufficient contrast ratios across the color spectrum
+
+### Loading System Implementation
+- **Full-Screen Loading Overlay**: Covers page content during media loading
+- **Animated Progress Tracking**: Visual spinner and progress bar (0-100%)
+- **Dual Media Loading**: Monitors both video (`loadeddata`) and audio (`canplaythrough`) events
+- **Error Resilience**: Continues loading even if media files fail to load
+- **Smooth Transitions**: 500ms fade-out animation when loading completes
+- **Mobile Responsive**: Adaptive spinner and text sizing for smaller screens
+- **Loading States**: Dynamic text updates ("Preparing files..." → "Ready to experience...")
+
+### CSS Enhancements
+- Consistent theme colors (#ff4444 red accent matching drone UI)
+- Backdrop blur effects for modern glass-morphism aesthetic
+- Responsive breakpoints for mobile/desktop optimization
+- Loading animation keyframes with smooth 1s rotation cycle
+
+### JavaScript Architecture
+- Event-driven loading system with `setupMediaLoading()` function
+- Progress state tracking with dual boolean flags (video/audio)
+- Automatic DOM cleanup after loading completes
+- Fallback timeout system (10 seconds) for network issues
+
 ## Technical Debt
 - Consider implementing audio worklets for better performance
 - Add service worker for offline functionality
 - Optimize audio file compression for faster loading
-- Add error handling for failed audio loads
+- ✅ **RESOLVED**: Add error handling for failed audio loads (now implemented with loading system)

@@ -221,16 +221,15 @@
             transition: all 0.3s ease;
         }
 
-        .status.with-drone {
-            background: rgba(255, 68, 68, 0.2);
-            border: 1px solid #ff4444;
-            color: #ff9999;
-        }
-
         .status.without-drone {
             background: rgba(68, 255, 68, 0.2);
             border: 1px solid #44ff44;
             color: #99ff99;
+        }
+
+        .status.with-drone {
+            border: 1px solid;
+            transition: all 0.3s ease;
         }
 
         @media (max-width: 768px) {
@@ -588,7 +587,8 @@
         }
         
         function setDroneVolume(volume) {
-            const normalizedVolume = (volume / 100) * 0.33; // Convert 0-100 to 0-0.33 (33% max)
+            // Convert 0-100 to 0-0.2 (20% max)
+            const normalizedVolume = (volume / 100) * 0.20; 
             
             if (audioContext && gainNode) {
                 // Smooth transition using Web Audio API
@@ -625,13 +625,35 @@
             if (volume > 0) {
                 droneSlider.classList.add('active');
                 audioVisualizer.classList.add('active');
-                statusText.textContent = `Playing with drone sound (${volume}%) - The complete resistance symphony`;
+                statusText.textContent = `Playing with drone sound (${volume}%)`;
                 statusText.className = 'status with-drone';
+                
+                // Calculate gradient color from yellow to red based on volume (0-100%)
+                const ratio = Math.min(volume / 100, 1); // Ensure ratio doesn't exceed 1
+                
+                // Yellow to Orange gradient: Yellow (255,255,0) to Orange (255,165,0)
+                const red = 255;
+                const green = Math.round(255 * (1 - ratio * 0.35)); // Decreases from 255 to 165 (orange)
+                const blue = 0;
+                
+                // Apply the gradient colors
+                const bgColor = `rgba(${red}, ${green}, ${blue}, 0.2)`;
+                const borderColor = `rgb(${red}, ${green}, ${blue})`;
+                const textColor = `rgb(${Math.min(255, red + 50)}, ${Math.min(255, green + 50)}, ${Math.min(255, blue + 50)})`;
+                
+                statusText.style.background = bgColor;
+                statusText.style.borderColor = borderColor;
+                statusText.style.color = textColor;
             } else {
                 droneSlider.classList.remove('active');
                 audioVisualizer.classList.remove('active');
                 statusText.textContent = 'Playing without drone\'s sound';
                 statusText.className = 'status without-drone';
+                
+                // Reset inline styles for without-drone state
+                statusText.style.background = '';
+                statusText.style.borderColor = '';
+                statusText.style.color = '';
             }
         }
         
@@ -692,8 +714,8 @@
                     videoPlayer.pause();
                 }
             } else if (e.code === 'KeyD') {
-                // Toggle between 0 and 60% volume with D key
-                const newVolume = currentVolume > 0 ? 0 : 60;
+                // Toggle between 0 and 50% volume with D key
+                const newVolume = currentVolume > 0 ? 0 : 50
                 droneSlider.value = newVolume;
                 droneSlider.dispatchEvent(new Event('input'));
             }
