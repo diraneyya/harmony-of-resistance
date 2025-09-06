@@ -1374,9 +1374,28 @@
                 }
             } else if (e.code === 'KeyD') {
                 // Toggle between 0 and 50% volume with D key
-                const newVolume = currentVolume > 0 ? 0 : 50
+                const newVolume = currentVolume > 0 ? 0 : 50;
+                currentVolume = newVolume;
                 droneSlider.value = newVolume;
-                droneSlider.dispatchEvent(new Event('input'));
+                
+                // Setup audio context on first interaction if needed
+                if (!isAudioSetup) {
+                    setupAudioContext();
+                }
+                
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                setDroneVolume(currentVolume);
+                updateUI(currentVolume);
+                updateMobileToggle(currentVolume);
+                
+                // Also update mobile bottom toggle if it exists
+                const mobileToggleBottom = document.getElementById('mobileToggleBottom');
+                if (mobileToggleBottom) {
+                    mobileToggleBottom.classList.toggle('active', currentVolume > 0);
+                }
             }
         });
         
