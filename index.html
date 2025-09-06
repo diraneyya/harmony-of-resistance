@@ -293,11 +293,32 @@
             left: 0;
             right: 0;
             background: rgba(26, 26, 26, 0.98);
+            background-image: url('drone.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-blend-mode: overlay;
             backdrop-filter: blur(15px);
             padding: 12px 20px;
             z-index: 1000;
             border-top: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 -5px 25px rgba(0,0,0,0.4);
+        }
+        
+        .mobile-bottom-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('drone.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: -1;
         }
 
         .bottom-bar-content {
@@ -890,6 +911,7 @@
         let loadingProgress = {
             video: false,
             audio: false,
+            videoBuffered: false,
             progress: 0
         };
         
@@ -897,11 +919,15 @@
             let completed = 0;
             if (loadingProgress.video) completed++;
             if (loadingProgress.audio) completed++;
+            if (loadingProgress.videoBuffered) completed++;
             
-            const percentage = (completed / 2) * 100;
+            const percentage = (completed / 3) * 100;
             loadingProgressBar.style.width = percentage + '%';
             
-            if (loadingProgress.video && loadingProgress.audio) {
+            // Update loading text based on progress
+            if (loadingProgress.video && loadingProgress.audio && !loadingProgress.videoBuffered) {
+                loadingSubtext.textContent = 'Buffering video... (33MB)';
+            } else if (loadingProgress.video && loadingProgress.audio && loadingProgress.videoBuffered) {
                 loadingSubtext.textContent = 'Ready to experience resistance through harmony';
                 setTimeout(() => {
                     loadingOverlay.classList.add('hidden');
@@ -917,15 +943,22 @@
             const videoPlayer = document.getElementById('videoPlayer');
             const droneAudio = document.getElementById('droneAudio');
             
-            // Video loading
+            // Video metadata loaded
             videoPlayer.addEventListener('loadeddata', () => {
                 loadingProgress.video = true;
+                updateLoadingProgress();
+            });
+            
+            // Video fully buffered and ready to play without interruption
+            videoPlayer.addEventListener('canplaythrough', () => {
+                loadingProgress.videoBuffered = true;
                 updateLoadingProgress();
             });
             
             videoPlayer.addEventListener('error', () => {
                 loadingSubtext.textContent = 'Error loading video file';
                 loadingProgress.video = true;
+                loadingProgress.videoBuffered = true;
                 updateLoadingProgress();
             });
             
@@ -945,14 +978,16 @@
             videoPlayer.load();
             droneAudio.load();
             
-            // Fallback timeout
+            // Extended fallback timeout for large video
             setTimeout(() => {
-                if (!loadingProgress.video || !loadingProgress.audio) {
+                if (!loadingProgress.video || !loadingProgress.audio || !loadingProgress.videoBuffered) {
                     loadingProgress.video = true;
                     loadingProgress.audio = true;
+                    loadingProgress.videoBuffered = true;
+                    loadingSubtext.textContent = 'Loading timeout - proceeding anyway';
                     updateLoadingProgress();
                 }
-            }, 10000);
+            }, 30000); // 30 second timeout for 33MB video
         }
         
         // Initialize loading system
