@@ -72,8 +72,10 @@ Key parameters for spectral subtraction:
 
 ### User Interface
 - **Loading Animation**: Animated spinner with progress bar during file preloading
-- **Drone Volume Control**: Smooth slider for precise volume adjustment (0-100%)
-- **Status Display**: Dynamic text with gradient color system (yellow → red based on volume percentage)
+- **Drone Volume Control**: 
+  - Desktop: Smooth slider for precise volume adjustment (0-100%)
+  - Mobile: Toggle switch between 0% and 50% (optimized for touch devices)
+- **Status Display**: Dynamic text with gradient color system (yellow → orange based on volume percentage)
 - **Responsive Design**: Works on mobile and desktop with adaptive layouts
 - **Keyboard Controls**: 
   - Spacebar: Play/pause video
@@ -85,7 +87,8 @@ Key parameters for spectral subtraction:
 3. **Audio Sync**: Periodic sync checks prevent drift between video and drone audio
 4. **Browser Compatibility**: Graceful fallback for browsers without Web Audio API support
 5. **Mobile Support**: Touch event handling and audio context resumption
-6. **Loading States**: Error handling and fallback timeout for failed media loads
+6. **Adaptive Controls**: Automatic detection switches between slider (desktop) and toggle (mobile)
+7. **Loading States**: Error handling and fallback timeout for failed media loads
 
 ## Deployment (GitHub Pages)
 1. Create new repository
@@ -135,10 +138,19 @@ The project demonstrates how oppressive surveillance technology can be transform
 
 ## Recent Updates
 
-### Gradient Color System (Latest)
-- **Dynamic Status Colors**: Banner color transitions smoothly from yellow (0%) to red (100%)
-- **Real-time Updates**: Color changes instantly as user adjusts volume slider
-- **RGB Calculation**: Yellow (255,255,0) interpolates to Red (255,0,0) based on volume ratio
+### Mobile Toggle Implementation (Latest)
+- **Adaptive Interface**: CSS media queries hide slider on mobile (≤768px) and show toggle
+- **Binary Control**: Simple on/off toggle switching between 0% and 50% drone volume
+- **Touch Optimization**: Large 80×40px toggle with smooth animations for finger interaction
+- **Visual Feedback**: Orange gradient background and sliding knob animation when active
+- **Label System**: Dynamic "Off" and "Drone 50%" labels with active state highlighting
+- **JavaScript Integration**: `handleMobileToggle()` function maintains sync with slider logic
+- **Consistent Behavior**: Mobile toggle triggers same audio processing as desktop slider
+
+### Gradient Color System
+- **Dynamic Status Colors**: Banner color transitions smoothly from yellow (0%) to orange (100%)
+- **Real-time Updates**: Color changes instantly as user adjusts volume slider/toggle
+- **RGB Calculation**: Yellow (255,255,0) interpolates to Orange (255,165,0) based on volume ratio
 - **CSS Integration**: Inline styles override default classes for gradient effect
 - **Accessibility**: Maintains sufficient contrast ratios across the color spectrum
 

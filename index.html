@@ -154,6 +154,59 @@
             box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
         }
 
+        .mobile-toggle {
+            display: none;
+            width: 80px;
+            height: 40px;
+            background: #333;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #555;
+        }
+
+        .mobile-toggle.active {
+            background: linear-gradient(135deg, #ff9500, #ff6500);
+            border-color: #ff9500;
+            box-shadow: 0 0 15px rgba(255, 149, 0, 0.3);
+        }
+
+        .mobile-toggle-knob {
+            width: 32px;
+            height: 32px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .mobile-toggle.active .mobile-toggle-knob {
+            transform: translateX(40px);
+            background: #fff;
+        }
+
+        .toggle-labels {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .toggle-label {
+            font-size: 0.8rem;
+            color: #cccccc;
+        }
+
+        .toggle-label.active {
+            color: #ff9500;
+            font-weight: 500;
+        }
+
         .volume-display {
             font-size: 1em;
             color: #ffffff;
@@ -253,8 +306,18 @@
                 gap: 15px;
             }
             
+            /* Hide slider on mobile, show toggle */
             .slider-container {
-                gap: 10px;
+                display: none;
+            }
+            
+            .mobile-toggle {
+                display: block;
+                margin: 0 auto;
+            }
+            
+            .toggle-labels {
+                display: flex;
             }
             
             .volume-label {
@@ -437,6 +500,16 @@
                     <input type="range" id="droneSlider" min="0" max="100" value="0" class="volume-slider">
                     <span class="volume-label">Max</span>
                 </div>
+                
+                <!-- Mobile Toggle (hidden on desktop) -->
+                <div class="mobile-toggle" id="mobileToggle">
+                    <div class="mobile-toggle-knob"></div>
+                </div>
+                <div class="toggle-labels">
+                    <span class="toggle-label" id="toggleLabelOff">Off</span>
+                    <span class="toggle-label" id="toggleLabelOn">Drone 50%</span>
+                </div>
+                
                 <div class="volume-display" id="volumeDisplay">0%</div>
             </div>
         </div>
@@ -545,6 +618,11 @@
         const statusText = document.getElementById('statusText');
         const volumeDisplay = document.getElementById('volumeDisplay');
         const audioVisualizer = document.querySelector('.audio-visualizer');
+        
+        // Mobile toggle elements
+        const mobileToggle = document.getElementById('mobileToggle');
+        const toggleLabelOff = document.getElementById('toggleLabelOff');
+        const toggleLabelOn = document.getElementById('toggleLabelOn');
         
         let currentVolume = 0;
         let audioContext;
@@ -657,6 +735,34 @@
             }
         }
         
+        // Mobile toggle functionality
+        function updateMobileToggle(volume) {
+            const isActive = volume > 0;
+            mobileToggle.classList.toggle('active', isActive);
+            toggleLabelOff.classList.toggle('active', !isActive);
+            toggleLabelOn.classList.toggle('active', isActive);
+        }
+        
+        function handleMobileToggle() {
+            const newVolume = currentVolume > 0 ? 0 : 50;
+            currentVolume = newVolume;
+            droneSlider.value = newVolume; // Keep slider in sync for internal logic
+            
+            // Setup audio context on first user interaction
+            if (!isAudioSetup) {
+                setupAudioContext();
+            }
+            
+            // Resume audio context if suspended
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            setDroneVolume(currentVolume);
+            updateUI(currentVolume);
+            updateMobileToggle(currentVolume);
+        }
+        
         // Event handlers
         droneSlider.addEventListener('input', function() {
             currentVolume = parseInt(this.value);
@@ -673,7 +779,11 @@
             
             setDroneVolume(currentVolume);
             updateUI(currentVolume);
+            updateMobileToggle(currentVolume);
         });
+        
+        // Mobile toggle event handler
+        mobileToggle.addEventListener('click', handleMobileToggle);
         
         // Sync drone audio with video playback
         videoPlayer.addEventListener('play', function() {
@@ -703,6 +813,7 @@
         
         // Initialize
         updateUI(0);
+        updateMobileToggle(0);
         
         // Add keyboard shortcut
         document.addEventListener('keydown', function(e) {
