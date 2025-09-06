@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy import signal
 import threading
 import sounddevice as sd
+from tqdm import tqdm
 
 class SpectralAudioRegenerator:
     def __init__(self, audio_file_path):
@@ -66,40 +67,45 @@ class SpectralAudioRegenerator:
     
     def plot_analysis(self, original_magnitude, avg_magnitude):
         """
-        Plot the spectral analysis results
+        Plot the spectral analysis results - SAVES TO FILE, NO GUI
         """
         freqs = librosa.fft_frequencies(sr=self.sr, n_fft=self.n_fft)
         
-        plt.figure(figsize=(15, 10))
+        # Set matplotlib to non-interactive backend to avoid GUI hanging
+        plt.ioff()  # Turn off interactive mode
+        
+        fig, axes = plt.subplots(2, 2, figsize=(15, 10))
         
         # Original spectrogram
-        plt.subplot(2, 2, 1)
+        ax1 = axes[0, 0]
         librosa.display.specshow(librosa.amplitude_to_db(original_magnitude),
                                 y_axis='hz', x_axis='time', sr=self.sr,
-                                hop_length=self.hop_length)
-        plt.title('Original Spectrogram')
-        plt.colorbar(format='%+2.0f dB')
+                                hop_length=self.hop_length, ax=ax1)
+        ax1.set_title('Original Spectrogram')
         
         # Average magnitude spectrum
-        plt.subplot(2, 2, 2)
-        plt.plot(freqs[:len(freqs)//2], avg_magnitude[:len(freqs)//2])
-        plt.xlabel('Frequency (Hz)')
-        plt.ylabel('Magnitude')
-        plt.title('Average Magnitude Spectrum')
-        plt.xlim(0, self.sr//2)
+        ax2 = axes[0, 1]
+        ax2.plot(freqs[:len(freqs)//2], avg_magnitude[:len(freqs)//2])
+        ax2.set_xlabel('Frequency (Hz)')
+        ax2.set_ylabel('Magnitude')
+        ax2.set_title('Average Magnitude Spectrum')
+        ax2.set_xlim(0, self.sr//2)
         
         # Dominant frequencies
-        plt.subplot(2, 2, 3)
+        ax3 = axes[1, 0]
         # Find peaks in the spectrum
         peaks, _ = signal.find_peaks(avg_magnitude, height=np.max(avg_magnitude)*0.1)
         peak_freqs = freqs[peaks]
         peak_mags = avg_magnitude[peaks]
         
-        plt.stem(peak_freqs, peak_mags, basefmt=' ')
-        plt.xlabel('Frequency (Hz)')
-        plt.ylabel('Magnitude')
-        plt.title('Dominant Frequency Components')
-        plt.xlim(0, min(5000, self.sr//2))  # Focus on lower frequencies
+        ax3.stem(peak_freqs, peak_mags, basefmt=' ')
+        ax3.set_xlabel('Frequency (Hz)')
+        ax3.set_ylabel('Magnitude')
+        ax3.set_title('Dominant Frequency Components')
+        ax3.set_xlim(0, min(5000, self.sr//2))  # Focus on lower frequencies
+        
+        # Hide the 4th subplot
+        axes[1, 1].axis('off')
         
         # Print dominant frequencies
         sorted_peaks = sorted(zip(peak_freqs, peak_mags), key=lambda x: x[1], reverse=True)
@@ -108,7 +114,16 @@ class SpectralAudioRegenerator:
             print(f"{i+1}: {freq:.1f} Hz (magnitude: {mag:.3f})")
         
         plt.tight_layout()
-        plt.show()
+        
+        # Save plot instead of showing it to avoid GUI issues
+        plt.savefig('spectral_analysis.png', dpi=150, bbox_inches='tight')
+        print("Spectral analysis plot saved as 'spectral_analysis.png'")
+        
+        # Close the figure to free memory
+        plt.close(fig)
+        
+        # Turn interactive mode back on for potential future plots
+        plt.ion()
     
     def generate_infinite_audio(self, duration_seconds=60, method='spectral_repeat'):
         """
@@ -138,41 +153,66 @@ class SpectralAudioRegenerator:
         Repeat the stable spectral pattern with slight randomization to avoid artifacts
         """
         target_samples = int(duration_seconds * self.sr)
+        
+        # More efficient approach: generate in larger chunks
+        chunk_duration = 2.0  # Generate 2-second chunks
+        chunk_samples = int(chunk_duration * self.sr)
+        num_chunks = int(np.ceil(duration_seconds / chunk_duration))
+        
+        print(f"Generating {num_chunks} chunks of {chunk_duration}s each...")
+        
+        # Generate one representative chunk with the spectral characteristics
+        chunk_frames = int(chunk_duration * self.sr / self.hop_length)
+        
+        # Create magnitude matrix for one chunk
+        magnitude_matrix = np.tile(self.avg_magnitude[:, np.newaxis], (1, chunk_frames))
+        
+        # Create smooth phase evolution for one chunk
+        phase_matrix = np.zeros((len(self.avg_magnitude), chunk_frames))
+        freqs = librosa.fft_frequencies(sr=self.sr, n_fft=self.n_fft)
+        
+        print("Creating spectral template...")
+        for i in tqdm(range(len(self.avg_magnitude)), desc="Building phase matrix"):
+            freq_hz = freqs[i]
+            if freq_hz > 0:
+                # Smooth phase evolution based on frequency
+                angular_freq = 2 * np.pi * freq_hz
+                time_points = np.arange(chunk_frames) * self.hop_length / self.sr
+                phase_matrix[i, :] = angular_freq * time_points + np.random.uniform(0, 2*np.pi)
+        
+        # Create the base chunk
+        print("Converting to time domain...")
+        complex_stft = magnitude_matrix * np.exp(1j * phase_matrix)
+        base_chunk = librosa.istft(complex_stft, 
+                                  hop_length=self.hop_length, 
+                                  window=self.window)
+        
+        # Now repeat this chunk with variations to create the full duration
         output_audio = np.zeros(target_samples)
         
-        # Parameters for generation
-        chunk_length = self.hop_length * (self.avg_magnitude.shape[0] // self.hop_length)
+        print("Assembling final audio...")
+        for i in tqdm(range(num_chunks), desc="Generating chunks"):
+            start_sample = i * chunk_samples
+            end_sample = min(start_sample + len(base_chunk), target_samples)
+            
+            # Add slight variations to each repetition
+            chunk_copy = base_chunk.copy()
+            if i > 0:  # Add slight variations after first chunk
+                # Very subtle amplitude modulation
+                mod_freq = 0.1 + np.random.uniform(-0.05, 0.05)
+                t = np.linspace(0, len(chunk_copy)/self.sr, len(chunk_copy))
+                amplitude_mod = 1 + 0.02 * np.sin(2 * np.pi * mod_freq * t)
+                chunk_copy *= amplitude_mod
+            
+            # Copy to output with overlap-add to avoid clicks
+            if start_sample + len(chunk_copy) <= target_samples:
+                output_audio[start_sample:start_sample + len(chunk_copy)] += chunk_copy
+            else:
+                remaining = target_samples - start_sample
+                output_audio[start_sample:target_samples] += chunk_copy[:remaining]
+                break
         
-        # Generate audio in chunks
-        current_pos = 0
-        while current_pos < target_samples:
-            # Create STFT with stable magnitude and evolving phase
-            chunk_frames = min(100, (target_samples - current_pos) // self.hop_length + 1)
-            
-            # Create magnitude matrix
-            magnitude_matrix = np.tile(self.avg_magnitude[:, np.newaxis], (1, chunk_frames))
-            
-            # Create phase matrix with continuous evolution
-            phase_matrix = np.zeros((len(self.avg_magnitude), chunk_frames))
-            for i in range(len(self.avg_magnitude)):
-                # Create smooth phase evolution
-                freq_bin = i
-                angular_freq = 2 * np.pi * freq_bin * self.hop_length / self.n_fft
-                phase_matrix[i, :] = angular_freq * np.arange(chunk_frames) + np.random.uniform(0, 2*np.pi)
-            
-            # Combine magnitude and phase
-            complex_stft = magnitude_matrix * np.exp(1j * phase_matrix)
-            
-            # Convert back to time domain
-            chunk_audio = librosa.istft(complex_stft, 
-                                       hop_length=self.hop_length, 
-                                       window=self.window)
-            
-            # Add to output
-            end_pos = min(current_pos + len(chunk_audio), target_samples)
-            output_audio[current_pos:end_pos] = chunk_audio[:end_pos-current_pos]
-            current_pos = end_pos
-        
+        print("Spectral repeat method complete!")
         return output_audio
     
     def _phase_vocoder_method(self, duration_seconds):
@@ -202,6 +242,8 @@ class SpectralAudioRegenerator:
         """
         Synthesize from dominant harmonic components
         """
+        print("Finding dominant frequencies...")
+        
         # Find peaks in the spectrum
         peaks, properties = signal.find_peaks(self.avg_magnitude, 
                                             height=np.max(self.avg_magnitude)*0.05,
@@ -211,23 +253,26 @@ class SpectralAudioRegenerator:
         peak_freqs = freqs[peaks]
         peak_amplitudes = self.avg_magnitude[peaks]
         
+        print(f"Found {len(peak_freqs)} dominant frequencies")
+        
         # Generate time vector
         t = np.linspace(0, duration_seconds, int(duration_seconds * self.sr))
         
         # Synthesize audio from harmonics
         synthesized = np.zeros_like(t)
         
-        for freq, amp in zip(peak_freqs, peak_amplitudes):
+        print("Synthesizing from harmonics...")
+        for i, (freq, amp) in enumerate(tqdm(zip(peak_freqs, peak_amplitudes), 
+                                           desc="Adding harmonics", 
+                                           total=len(peak_freqs))):
             if freq > 0:  # Skip DC component
-                # Add slight frequency and amplitude modulation for more natural sound
-                freq_mod = freq * (1 + 0.001 * np.sin(2 * np.pi * 0.5 * t))  # Slight vibrato
-                amp_mod = amp * (1 + 0.05 * np.sin(2 * np.pi * 0.3 * t))     # Slight tremolo
-                
-                synthesized += amp_mod * np.sin(2 * np.pi * freq_mod * t + np.random.uniform(0, 2*np.pi))
+                # Pure steady harmonics - no modulation for perfect stability
+                synthesized += amp * np.sin(2 * np.pi * freq * t + np.random.uniform(0, 2*np.pi))
         
         # Normalize
         synthesized = synthesized / (np.max(np.abs(synthesized)) + 1e-8)
         
+        print("Harmonic synthesis complete!")
         return synthesized
     
     def save_audio(self, audio, filename, normalize=True):
@@ -265,7 +310,7 @@ if __name__ == "__main__":
     regenerator = SpectralAudioRegenerator("zannana.mp3")
     
     # Analyze the spectral content - saves plot to file instead of showing GUI
-    regenerator.analyze_spectrum(plot=True, save_plot=True)
+    regenerator.analyze_spectrum(plot=True)
     
     # Generate different versions
     print("\nGenerating audio with different methods...")
