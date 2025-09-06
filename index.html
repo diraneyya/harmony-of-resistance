@@ -328,7 +328,7 @@
         }
         
         function setDroneVolume(volume) {
-            const normalizedVolume = volume / 100; // Convert 0-100 to 0-1
+            const normalizedVolume = (volume / 100) * 0.33; // Convert 0-100 to 0-0.33 (33% max)
             
             if (audioContext && gainNode) {
                 // Smooth transition using Web Audio API

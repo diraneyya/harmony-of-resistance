@@ -338,18 +338,22 @@ if __name__ == "__main__":
     
     # Method 1: Spectral subtraction (recommended for steady noise)
     print("\n=== Spectral Subtraction Method ===")
-    remover.remove_noise_from_audio("song.mp3", 
-                                   "song_cleaned_spectral.wav",
-                                   method='spectral_subtraction',
-                                   noise_reduction_factor=1.2,
-                                   spectral_floor=0.1)
+    for i in [10]:
+        for j in range(12, 20, 4):
+            print(f"\n=== reduction factor {i/10} spectral floor {j/100} ===")
+            remover.remove_noise_from_audio("song.mp3", 
+                f"song_cleaned_spectral_factor{i/10}_floor{j/100}.wav",
+                    method='spectral_subtraction',
+                    noise_reduction_factor=i/10,
+                    spectral_floor=j/100)
     
     # Method 2: Harmonic subtraction (good for tonal noise)
-    print("\n=== Harmonic Subtraction Method ===")
-    remover.remove_noise_from_audio("song.mp3",
-                                   "song_cleaned_harmonic.wav", 
-                                   method='harmonic_subtraction',
-                                   noise_reduction_factor=0.8)
+    # print("\n=== Harmonic Subtraction Method ===")
+    # for i in range(16, 20):
+    #     remover.remove_noise_from_audio("song.mp3",
+    #         f"song_cleaned_harmonic_{i / 10}.wav", 
+    #         method='harmonic_subtraction',
+    #         noise_reduction_factor=i / 10)
     
     print("\n" + "="*50)
     print("Noise removal complete!")
