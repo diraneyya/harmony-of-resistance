@@ -991,9 +991,23 @@
             }
         }
         
-        function setupMediaLoading() {
+        async function setupMediaLoading() {
             const videoPlayer = document.getElementById('videoPlayer');
             const droneAudio = document.getElementById('droneAudio');
+            
+            // Detect bandwidth and set appropriate video source
+            if (adaptiveVideoEnabled) {
+                loadingSubtext.textContent = 'Detecting connection speed...';
+                detectedBandwidth = await detectBandwidth();
+                const videoSource = getVideoSource(detectedBandwidth);
+                
+                // Update video source
+                const sourceElement = videoPlayer.querySelector('source');
+                if (sourceElement) {
+                    sourceElement.src = videoSource;
+                    loadingSubtext.textContent = `Loading video (${detectedBandwidth} quality)...`;
+                }
+            }
             
             // Video metadata loaded
             videoPlayer.addEventListener('loadeddata', () => {
@@ -1031,6 +1045,7 @@
             droneAudio.load();
             
             // Extended fallback timeout for large video
+            const timeoutDuration = detectedBandwidth === 'ultra_low' ? 60000 : 30000;
             setTimeout(() => {
                 if (!loadingProgress.video || !loadingProgress.audio || !loadingProgress.videoBuffered) {
                     loadingProgress.video = true;
@@ -1039,7 +1054,7 @@
                     loadingSubtext.textContent = 'Loading timeout - proceeding anyway';
                     updateLoadingProgress();
                 }
-            }, 30000); // 30 second timeout for 33MB video
+            }, timeoutDuration);
         }
         
         // Initialize loading system
@@ -1065,6 +1080,76 @@
         let audioContext;
         let videoSource, droneSource, gainNode;
         let isAudioSetup = false;
+        
+        // Adaptive video quality based on bandwidth detection
+        let detectedBandwidth = 'unknown';
+        let adaptiveVideoEnabled = true;
+        
+        // Bandwidth detection using network connection API and fallback test
+        async function detectBandwidth() {
+            try {
+                // Try modern Network Information API first
+                if ('connection' in navigator) {
+                    const connection = navigator.connection;
+                    const effectiveType = connection.effectiveType;
+                    
+                    console.log(`Network type detected: ${effectiveType}`);
+                    
+                    // Map connection types to our quality levels
+                    const typeMap = {
+                        'slow-2g': 'ultra_low',
+                        '2g': 'ultra_low', 
+                        '3g': 'low',
+                        '4g': 'high'
+                    };
+                    
+                    if (typeMap[effectiveType]) {
+                        return typeMap[effectiveType];
+                    }
+                }
+                
+                // Fallback: Test download speed
+                const startTime = Date.now();
+                const response = await fetch('song_cleaned.mp4', { 
+                    method: 'HEAD',
+                    cache: 'no-cache'
+                });
+                
+                if (response.ok) {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    console.log(`Connection test: ${responseTime}ms response time`);
+                    
+                    // Categorize based on response time
+                    if (responseTime > 2000) {
+                        return 'ultra_low'; // Very slow connection
+                    } else if (responseTime > 1000) {
+                        return 'low'; // Moderate connection
+                    } else {
+                        return 'high'; // Fast connection
+                    }
+                }
+                
+            } catch (error) {
+                console.log('Bandwidth detection failed:', error);
+            }
+            
+            // Default to high quality if all tests fail
+            return 'high';
+        }
+        
+        // Select appropriate video source based on bandwidth
+        function getVideoSource(bandwidth) {
+            const sources = {
+                ultra_low: 'song_cleaned_ultra_low.mp4', // 3.2MB, 360p
+                low: 'song_cleaned_low.mp4',             // 7.3MB, 480p  
+                high: 'song_cleaned.mp4'                 // 24MB, 720p
+            };
+            
+            console.log(`Selected video quality: ${bandwidth} (${sources[bandwidth]})`);
+            return sources[bandwidth] || sources.high;
+        }
         
         // Initialize Web Audio API for seamless audio mixing
         function setupAudioContext() {

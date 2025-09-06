@@ -113,6 +113,54 @@ distance=5               # Allows closer peaks
 3. Enable Pages in repository settings
 4. Site available at: `https://username.github.io/repository-name`
 
+## Adaptive Video Quality System
+
+The application automatically detects user bandwidth and serves appropriate video quality to optimize loading times and user experience.
+
+### Video Quality Levels
+
+| Quality | Resolution | File Size | Compression | Use Case |
+|---------|------------|-----------|-------------|-----------|
+| **High** | 720x1280 | 24MB | CRF 28 | Fast connections (>2Mbps) |
+| **Low** | 480x854 | 7.3MB | CRF 32 | Moderate connections (0.5-2Mbps) |
+| **Ultra Low** | 360x640 | 3.2MB | CRF 36 | Slow connections (<0.5Mbps) |
+
+### Bandwidth Detection Methods
+
+1. **Network Information API**: Uses `navigator.connection.effectiveType` on supported browsers
+2. **Response Time Test**: Fallback method using HEAD request to video file
+3. **Connection Type Mapping**:
+   - `slow-2g`, `2g` → Ultra Low (360p)
+   - `3g` → Low (480p) 
+   - `4g` → High (720p)
+
+### FFmpeg Compression Commands
+
+#### Low Quality (480p)
+```bash
+ffmpeg -i song_cleaned.mp4 -c:a copy -c:v libx264 -crf 32 -preset fast -s 480x854 -movflags +faststart song_cleaned_low.mp4
+```
+
+#### Ultra Low Quality (360p)  
+```bash
+ffmpeg -i song_cleaned.mp4 -c:a copy -c:v libx264 -crf 36 -preset fast -s 360x640 -movflags +faststart song_cleaned_ultra_low.mp4
+```
+
+**Key Parameters:**
+- `-c:a copy`: Preserves original audio quality (no audio compression)
+- `-crf 28/32/36`: Constant Rate Factor (higher = more compression)
+- `-preset fast`: Balance between compression speed and efficiency
+- `-movflags +faststart`: Optimizes for web streaming
+- `-s WxH`: Scales video resolution
+
+### Adaptive Loading Features
+
+- **Automatic Detection**: Runs bandwidth test during loading screen
+- **Smart Timeouts**: Longer timeout (60s) for ultra low bandwidth users  
+- **User Feedback**: Loading screen shows detected quality level
+- **Graceful Fallback**: Defaults to high quality if detection fails
+- **Audio Preservation**: All quality levels maintain identical audio
+
 ## FFmpeg Commands Used
 
 ### Get Video Duration
