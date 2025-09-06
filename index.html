@@ -6,7 +6,7 @@
     <title>Resistance Through Harmony</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poltawski+Nowy:ital,wght@1,500&family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -21,7 +21,7 @@
             background-repeat: no-repeat;
             background-position: center;
             background-attachment: fixed;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             color: #ffffff;
             min-height: 100vh;
             display: flex;
@@ -52,8 +52,10 @@
         }
 
         .title {
+            font-family: 'Poltawski Nowy', serif;
             font-size: clamp(2rem, 5vw, 3.5rem);
-            font-weight: 600;
+            font-weight: 500;
+            font-style: italic;
             margin-bottom: 20px;
             color: #ffffff;
             letter-spacing: -0.02em;
@@ -471,6 +473,7 @@
             }
             
             .title {
+                font-family: 'Poltawski Nowy', serif;
                 font-size: clamp(1.5rem, 3vw, 2.5rem);
                 margin-bottom: 15px;
             }
@@ -604,6 +607,16 @@
                 padding: 15px 20px;
                 transition: all 0.4s ease;
                 cursor: pointer;
+                animation: subtlePulse 3s ease-in-out infinite;
+            }
+            
+            @keyframes subtlePulse {
+                0%, 100% { 
+                    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1);
+                }
+                50% { 
+                    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+                }
             }
             
             .mobile-header:hover {
@@ -613,10 +626,35 @@
             }
             
             .mobile-header .title {
-                font-size: 1.4rem;
+                font-family: 'Poltawski Nowy', serif;
+                font-size: clamp(1.4rem, 10vw, 2.5rem);
+                font-style: italic;
+                font-weight: 500;
                 margin: 0;
                 transition: all 0.4s ease;
                 color: #ffffff;
+                position: relative;
+            }
+            
+            .mobile-header .title::after {
+                content: '⇱';
+                display: inline-block;
+                margin-left: 8px;
+                font-size: 1.8rem;
+                font-style: normal;
+                font-family: serif;
+                opacity: 0.6;
+                transition: all 0.4s ease;
+                transform: rotate(0deg);
+            }
+            
+            .mobile-header:hover .title::after {
+                transform: rotate(180deg);
+                opacity: 0.8;
+            }
+            
+            .mobile-header.expanded .title::after {
+                opacity: 0;
             }
             
             .mobile-header .subtitle {
@@ -630,7 +668,8 @@
                 color: #cccccc;
             }
             
-            .mobile-header:hover .subtitle {
+            .mobile-header:hover .subtitle,
+            .mobile-header.expanded .subtitle {
                 max-height: 150px;
                 opacity: 1;
             }
@@ -1432,7 +1471,7 @@
         
         // Periodic sync to prevent drift
         setInterval(() => {
-            if (!videoPlayer.paused && isDroneActive) {
+            if (!videoPlayer.paused && droneAudio.volume > 0) {
                 syncDroneWithVideo();
             }
         }, 1000);
@@ -1514,6 +1553,43 @@
         if (!audioContext) {
             setupFallbackAudio();
         }
+        
+        // Mobile header click functionality
+        function setupMobileHeader() {
+            const mobileHeader = document.getElementById('mobileHeader');
+            if (!mobileHeader) return;
+            
+            let isExpanded = false;
+            
+            mobileHeader.addEventListener('click', function() {
+                if (!isExpanded) {
+                    mobileHeader.classList.add('expanded');
+                    isExpanded = true;
+                    
+                    // Hide after 3 seconds or when clicking video
+                    setTimeout(() => {
+                        if (isExpanded) {
+                            mobileHeader.classList.remove('expanded');
+                            isExpanded = false;
+                        }
+                    }, 3000);
+                }
+            });
+            
+            // Hide when clicking on video
+            const videoPlayer = document.getElementById('videoPlayer');
+            if (videoPlayer) {
+                videoPlayer.addEventListener('click', function() {
+                    if (isExpanded) {
+                        mobileHeader.classList.remove('expanded');
+                        isExpanded = false;
+                    }
+                });
+            }
+        }
+        
+        // Initialize mobile header
+        document.addEventListener('DOMContentLoaded', setupMobileHeader);
         
         // Initialize loading system (must be called after all variables and functions are defined)
         setupMediaLoading();
