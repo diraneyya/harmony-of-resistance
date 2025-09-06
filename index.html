@@ -1386,6 +1386,7 @@
         function handleMobileToggleBottom() {
             const newVolume = currentVolume > 0 ? 0 : 50;
             currentVolume = newVolume;
+            droneSlider.value = newVolume; // Keep desktop slider in sync
             
             // Setup audio context on first interaction
             if (!isAudioSetup) {
