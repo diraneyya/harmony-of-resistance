@@ -1,0 +1,67 @@
+# License
+
+## Main Project Components
+
+All files in this repository, except where noted below, are released under the MIT License:
+
+**MIT License**
+
+Copyright (c) 2025 Drone Song Project
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+## Third-Party Assets
+
+### Purchased Commercial Assets
+
+The following files are purchased commercial assets and are **NOT** covered by the MIT License above:
+
+- `keydz.svg` - Keyboard keys line art vector graphics
+  - Source: iStock by Getty Images
+  - URL: https://www.istockphoto.com/de/vektor/line-art-tastaturtasten-gm609793684-104501995
+  - License: Standard iStock License (commercial use permitted for licensed purchaser only)
+  - **This file may not be redistributed, shared, or used without proper licensing from iStock**
+
+### Musical Content and Artist Attribution
+
+The musical content in this project features the work of:
+
+**Ahmed Muin from Gaza Birds Singing**
+
+- The original musical composition and performance are the creative work of Ahmed Muin
+- **Rights Status**: Due to the ongoing situation of genocide in Gaza, direct communication with the artist regarding formal licensing has been challenging
+- **Current Understanding**: The artist has expressed a desire for visibility and sharing of their work as a form of resistance
+- **Commitment**: As circumstances allow for clearer communication, this project will fully comply with whatever terms the artist demands
+- **Solidarity**: This project exists to amplify the artist's voice and demonstrate artistic resistance in the face of oppression
+
+**Important Note**: The inclusion of this musical work is done in the spirit of solidarity and with the understanding that the artist wants their story and resistance heard. If you are Ahmed Muin or represent them, please contact the maintainers of this project to clarify licensing terms.
+
+### Redistributing This Project
+
+If you fork, redistribute, or create derivative works from this project:
+
+1. **You MUST remove** `keydz.svg` from your copy or obtain your own license from iStock
+2. **You MUST respect** the artist Ahmed Muin's rights and maintain proper attribution
+3. **You MUST comply** with any licensing terms the artist establishes when they become available
+4. The technical components (HTML, CSS, JavaScript) can be freely used under the MIT License
+5. You may replace `keydz.svg` with your own keyboard icon or remove the keyboard visual entirely
+
+## Context and Purpose
+
+This project serves as both a technical demonstration and an act of solidarity, showcasing how artistic expression can transform oppressive sounds into instruments of resistance. The work highlights the creativity and resilience of Ahmed Muin from Gaza Birds Singing, who discovered that harmonizing with drone surveillance sounds could create something beautiful from something oppressive.

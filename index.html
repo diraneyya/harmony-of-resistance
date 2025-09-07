@@ -126,6 +126,27 @@
             font-size: 1.2em;
             color: #ffffff;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .keyboard-shortcuts {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .key-icon {
+            height: 38px;
+            width: auto;
+            opacity: 0.9;
+            transition: opacity 0.2s ease;
+        }
+        
+        .key-icon:hover {
+            opacity: 1;
         }
 
         .slider-container {
@@ -289,13 +310,24 @@
         }
 
         kbd {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 4px;
-            padding: 2px 6px;
-            font-size: 0.8rem;
-            font-family: 'Inter', monospace;
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            line-height: 1.2;
             color: #ffffff;
+            vertical-align: middle;
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-bottom-color: rgba(255, 255, 255, 0.25);
+            border-radius: 5px;
+            box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.1s ease;
+        }
+        
+        kbd:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
         }
         
 
@@ -974,7 +1006,12 @@
             
             <div class="controls">
                 <div class="drone-control">
-                    <div class="control-label">Drone Volume</div>
+                    <div class="control-label">
+                        Drone Volume 
+                        <span class="keyboard-shortcuts">
+                            <img src="keydz.svg" alt="D key" class="key-icon" onerror="this.style.display='none'">
+                        </span>
+                    </div>
                     <div class="slider-container">
                         <span class="volume-label">Off</span>
                         <input type="range" id="droneSlider" min="0" max="100" value="0" class="volume-slider">
@@ -998,7 +1035,7 @@
                 <div class="tip-icon">💡</div>
                 <div class="tip-content">
                     <p>Use the volume slider above to control the drone audio layer. By changing the volume you can more clearly understand how the artist harmonized with the oppressive surveillance soundtrack.</p>
-                    <p class="tip-shortcuts">Keyboard shortcuts (when on desktop): <kbd>Space</kbd> to play/pause video • <kbd>D</kbd> to toggle drone volume</p>
+                    <p class="tip-shortcuts">Keyboard shortcuts (when on desktop): <kbd>Space</kbd> to play/pause video • <kbd>D</kbd> or <kbd>Z</kbd> to toggle drone volume</p>
                 </div>
             </div>
         </div>
@@ -1337,16 +1374,9 @@
             }
         }
         
-        // Mobile toggle functionality
-        function updateMobileToggle(volume) {
-            const isActive = volume > 0;
-            mobileToggle.classList.toggle('active', isActive);
-            toggleLabelOff.classList.toggle('active', !isActive);
-            toggleLabelOn.classList.toggle('active', isActive);
-        }
-        
-        function handleMobileToggle() {
-            const newVolume = currentVolume > 0 ? 0 : 50;
+        // Consolidated toggle function for all controls
+        function toggleDroneAudio(volumeLevel = 100) {
+            const newVolume = currentVolume > 0 ? 0 : volumeLevel;
             currentVolume = newVolume;
             droneSlider.value = newVolume; // Keep slider in sync for internal logic
             
@@ -1363,6 +1393,19 @@
             setDroneVolume(currentVolume);
             updateUI(currentVolume);
             updateMobileToggle(currentVolume);
+            updateMobileBottomToggle(currentVolume);
+        }
+        
+        // Mobile toggle functionality
+        function updateMobileToggle(volume) {
+            const isActive = volume > 0;
+            mobileToggle.classList.toggle('active', isActive);
+            toggleLabelOff.classList.toggle('active', !isActive);
+            toggleLabelOn.classList.toggle('active', isActive);
+        }
+        
+        function handleMobileToggle() {
+            toggleDroneAudio(50); // Mobile toggle uses 50% volume
         }
         
         // Event handlers
@@ -1400,25 +1443,7 @@
         
         // Mobile toggle bottom functionality  
         function handleMobileToggleBottom() {
-            // Changed the toggle behaviour to switch to 100%
-            // This makes it more inline with the KeyD behaviour
-            const newVolume = currentVolume > 0 ? 0 : 100;
-            currentVolume = newVolume;
-            droneSlider.value = newVolume; // Keep desktop slider in sync
-            
-            // Setup audio context on first interaction
-            if (!isAudioSetup) {
-                setupAudioContext();
-            }
-            
-            if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            
-            setDroneVolume(currentVolume);
-            updateUI(currentVolume);
-            updateMobileToggle(currentVolume);
-            updateMobileBottomToggle(currentVolume);
+            toggleDroneAudio(100); // Mobile bottom toggle uses 100% volume (same as keyboard)
         }
         
         // Update mobile bottom toggle visual state
@@ -1532,7 +1557,7 @@
         // Initialize desktop play button
         document.addEventListener('DOMContentLoaded', setupDesktopPlayButton);
         
-        // Add keyboard shortcut
+        // Add keyboard shortcuts
         document.addEventListener('keydown', function(e) {
             if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
                 e.preventDefault();
@@ -1541,30 +1566,10 @@
                 } else {
                     videoPlayer.pause();
                 }
-            } else if (e.code === 'KeyD') {
-                // Toggle between 0 and 100% volume with D key
-                const newVolume = currentVolume > 0 ? 0 : 100;
-                currentVolume = newVolume;
-                droneSlider.value = newVolume;
-                
-                // Setup audio context on first interaction if needed
-                if (!isAudioSetup) {
-                    setupAudioContext();
-                }
-                
-                if (audioContext && audioContext.state === 'suspended') {
-                    audioContext.resume();
-                }
-                
-                setDroneVolume(currentVolume);
-                updateUI(currentVolume);
-                updateMobileToggle(currentVolume);
-                
-                // Also update mobile bottom toggle if it exists
-                const mobileToggleBottom = document.getElementById('mobileToggleBottom');
-                if (mobileToggleBottom) {
-                    mobileToggleBottom.classList.toggle('active', currentVolume > 0);
-                }
+            } else if (e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 'z') {
+                e.preventDefault(); // Prevent any default behavior
+                // Toggle between 0 and 100% volume with D or Z key
+                toggleDroneAudio(100);
             }
         });
         
