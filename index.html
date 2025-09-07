@@ -664,7 +664,17 @@
                 }
             }
             
-            .mobile-header:hover {
+            /* Only apply hover styling on non-touch devices */
+            @media (hover: hover) and (pointer: fine) {
+                .mobile-header:hover {
+                    background: rgba(26, 26, 26, 0.95);
+                    padding: 20px 20px 30px 20px;
+                    box-shadow: 0 0 30px rgba(0,0,0,0.6);
+                }
+            }
+            
+            /* Touch-specific expanded state styling */
+            .mobile-header.expanded {
                 background: rgba(26, 26, 26, 0.95);
                 padding: 20px 20px 30px 20px;
                 box-shadow: 0 0 30px rgba(0,0,0,0.6);
@@ -693,13 +703,18 @@
                 transform: rotate(0deg);
             }
             
-            .mobile-header:hover .title::after {
-                transform: rotate(180deg);
-                opacity: 0.8;
+            /* Arrow behavior for hover on non-touch devices */
+            @media (hover: hover) and (pointer: fine) {
+                .mobile-header:hover .title::after {
+                    transform: rotate(180deg);
+                    opacity: 0.8;
+                }
             }
             
+            /* Arrow behavior for expanded state on touch devices */
             .mobile-header.expanded .title::after {
-                opacity: 0;
+                transform: rotate(180deg);
+                opacity: 0.8;
             }
             
             .mobile-header .subtitle {
@@ -713,10 +728,17 @@
                 color: #cccccc;
             }
             
-            .mobile-header:hover .subtitle,
             .mobile-header.expanded .subtitle {
-                max-height: 150px;
+                max-height: 300px;
                 opacity: 1;
+            }
+            
+            /* Only apply hover on non-touch devices to prevent conflicts with tap behavior */
+            @media (hover: hover) and (pointer: fine) {
+                .mobile-header:hover .subtitle {
+                    max-height: 300px;
+                    opacity: 1;
+                }
             }
             
             /* Reposition existing video container for mobile full-height */
@@ -1584,31 +1606,48 @@
             if (!mobileHeader) return;
             
             let isExpanded = false;
+            let autoFoldTimeout = null;
             
-            mobileHeader.addEventListener('click', function() {
-                if (!isExpanded) {
+            // Single function to handle folding - prevents code duplication
+            function foldHeader() {
+                if (isExpanded) {
+                    console.log('Folding header');
+                    mobileHeader.classList.remove('expanded');
+                    isExpanded = false;
+                    if (autoFoldTimeout) {
+                        clearTimeout(autoFoldTimeout);
+                        autoFoldTimeout = null;
+                    }
+                }
+            }
+            
+            // Toggle header on click
+            mobileHeader.addEventListener('click', function(e) {
+                // Don't toggle if clicking on links
+                if (e.target.tagName === 'A' || e.target.closest('a')) {
+                    return;
+                }
+                
+                console.log('Header clicked, isExpanded:', isExpanded);
+                
+                if (isExpanded) {
+                    foldHeader();
+                } else {
                     mobileHeader.classList.add('expanded');
                     isExpanded = true;
                     
-                    // Hide after 3 seconds or when clicking video
-                    setTimeout(() => {
-                        if (isExpanded) {
-                            mobileHeader.classList.remove('expanded');
-                            isExpanded = false;
-                        }
-                    }, 3000);
+                    // Auto-fold after 5 seconds (longer since manual folding is now clear)
+                    autoFoldTimeout = setTimeout(foldHeader, 5000);
                 }
             });
             
-            // Hide when clicking on video
+            // Fold when clicking on video
             const videoPlayer = document.getElementById('videoPlayer');
             if (videoPlayer) {
-                videoPlayer.addEventListener('click', function() {
-                    if (isExpanded) {
-                        mobileHeader.classList.remove('expanded');
-                        isExpanded = false;
-                    }
-                });
+                videoPlayer.addEventListener('click', foldHeader);
+                
+                // Fold when video starts playing
+                videoPlayer.addEventListener('play', foldHeader);
             }
         }
         
