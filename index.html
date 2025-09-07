@@ -139,7 +139,7 @@
         }
         
         .key-icon {
-            height: 38px;
+            height: 32px;
             width: auto;
             opacity: 0.9;
             transition: opacity 0.2s ease;
@@ -1008,14 +1008,16 @@
                 <div class="drone-control">
                     <div class="control-label">
                         Drone Volume 
-                        <span class="keyboard-shortcuts">
-                            <img src="keydz.svg" alt="D key" class="key-icon" onerror="this.style.display='none'">
-                        </span>
                     </div>
                     <div class="slider-container">
                         <span class="volume-label">Off</span>
                         <input type="range" id="droneSlider" min="0" max="100" value="0" class="volume-slider">
-                        <span class="volume-label">Max</span>
+                        <span class="volume-label">
+                            <span class="keyboard-shortcuts">
+                                <img src="keyd.svg" alt="D key" class="key-icon" onerror="this.style.display='none'">
+                                <img src="keyz.svg" alt="Z key" class="key-icon" onerror="this.style.display='none'">
+                        </span>
+                        </span>
                     </div>
                     
                     <!-- Mobile Toggle (hidden on desktop) -->
