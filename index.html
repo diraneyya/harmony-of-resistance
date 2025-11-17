@@ -1581,6 +1581,18 @@
         
         // Add keyboard shortcuts
         document.addEventListener('keydown', function(e) {
+            // Debug logging
+            console.log('Key pressed:', {
+                key: e.key,
+                code: e.code,
+                keyLowerCase: e.key.toLowerCase(),
+                shiftKey: e.shiftKey,
+                ctrlKey: e.ctrlKey,
+                altKey: e.altKey,
+                metaKey: e.metaKey,
+                target: e.target.tagName
+            });
+
             if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
                 e.preventDefault();
                 if (videoPlayer.paused) {
@@ -1589,6 +1601,7 @@
                     videoPlayer.pause();
                 }
             } else if (e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 'z' || e.code === 'KeyD') {
+                console.log('Drone toggle triggered!');
                 e.preventDefault(); // Prevent any default behavior
                 // Toggle between 0 and 100% volume with D or Z key (both uppercase and lowercase)
                 // Also works with KeyD code for non-Latin keyboards

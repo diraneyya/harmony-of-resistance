@@ -24,14 +24,14 @@ A web application that demonstrates artistic resistance through music - showcasi
 - **Frontend**: Single HTML file with embedded CSS/JS
 - **Audio Mixing**: Web Audio API for real-time drone layering
 - **Video Source**: Cleaned mono version only (`song_cleaned.mp4`)
-- **Drone Audio**: Perfect harmonic reconstruction (`zannana_improved_exact.wav`)
+- **Drone Audio**: Perfect harmonic reconstruction (`zannana_improved_exact.mp3` - converted from WAV for web performance)
 
 ## File Structure
 ```
 project/
 ├── index.html                          # Main web application
 ├── song_cleaned.mp4                    # Video without drone audio (mono)
-├── zannana_improved_exact.wav          # Perfect infinite drone reconstruction
+├── zannana_improved_exact.mp3          # Perfect infinite drone reconstruction (web-optimized)
 ├── spectral_audio_regen.py            # Original multi-method generator
 ├── reconstruct_zannana.py              # High-resolution drone generator (improved)
 ├── harmonic_buzz_removal.py           # Original noise removal tool
@@ -109,7 +109,7 @@ distance=5               # Allows closer peaks
 
 ## Deployment (GitHub Pages)
 1. Create new repository
-2. Upload files: `index.html`, `song_cleaned.mp4`, `zannana_improved_exact.wav`
+2. Upload files: `index.html`, `song_cleaned.mp4`, `zannana_improved_exact.mp3`
 3. Enable Pages in repository settings
 4. Site available at: `https://username.github.io/repository-name`
 
