@@ -1588,9 +1588,10 @@
                 } else {
                     videoPlayer.pause();
                 }
-            } else if (e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 'z') {
+            } else if (e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 'z' || e.code === 'KeyD') {
                 e.preventDefault(); // Prevent any default behavior
-                // Toggle between 0 and 100% volume with D or Z key
+                // Toggle between 0 and 100% volume with D or Z key (both uppercase and lowercase)
+                // Also works with KeyD code for non-Latin keyboards
                 toggleDroneAudio(100);
             }
         });
